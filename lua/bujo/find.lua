@@ -57,28 +57,37 @@ return {
             relpath = relative_path,
           }
         end,
-        sorter = conf.generic_sorter({}),
-        attach_mappings = function(prompt_bufnr, map)
-          -- Default action opens the selected file in a new buffer
-          actions.select_default:replace(function()
-            local selection = action_state.get_selected_entry()
-            actions.close(prompt_bufnr)
-            if selection then
-              vim.cmd("edit " .. vim.fn.fnameescape(selection.value))
-            end
-          end)
-
-          -- Insert a markdown link to the selected file in the current buffer
-          -- TODO: keymap needs to be added to the config
-          map("ni", "<C-l>", function()
-            local selection = action_state.get_selected_entry()
-            if not selection then return end
-            actions.close(prompt_bufnr)
-            local link_text = string.format("[%s](%s)", selection.filename or selection.relpath, selection.relpath)
-            vim.api.nvim_put({ link_text }, "c", true, true)
-          end)
-        end,
       },
+      sorter = conf.generic_sorter({}),
+      attach_mappings = function(prompt_bufnr, map)
+        -- Default action opens the selected file in a new buffer
+        actions.select_default:replace(function()
+          local selection = action_state.get_selected_entry()
+          actions.close(prompt_bufnr)
+          if selection then
+            vim.cmd("edit " .. vim.fn.fnameescape(selection.value))
+          end
+        end)
+
+        -- Insert a markdown link to the selected file in the current buffer
+        -- TODO: keymap needs to be added to the config
+        local function insert_link(selection)
+          if not selection then return end
+          actions.close(prompt_bufnr)
+          local link_text = string.format("[%s](%s)", selection.filename or selection.relpath, selection.relpath)
+          vim.api.nvim_put({ link_text }, "c", true, true)
+        end
+        map("n", "<M-i>", function()
+          local selection = action_state.get_selected_entry()
+          insert_link(selection)
+        end)
+        map("i", "<M-i>", function()
+          local selection = action_state.get_selected_entry()
+          insert_link(selection)
+        end)
+
+        return true
+      end,
     }):find()
   end
 }
