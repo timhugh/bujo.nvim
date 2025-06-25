@@ -15,6 +15,9 @@ local default_config = {
 
   -- subdirectory in journal_dir where notes will be stored
   notes_dir = "notes",
+
+  -- keybind for inserting markdown links from telescope picker
+  telescope_insert_link_keybind = "<M-i>",
 }
 
 local M = vim.tbl_deep_extend("force", {}, default_config)

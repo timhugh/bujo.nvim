@@ -70,18 +70,17 @@ return {
         end)
 
         -- Insert a markdown link to the selected file in the current buffer
-        -- TODO: keymap needs to be added to the config
         local function insert_link(selection)
           if not selection then return end
           actions.close(prompt_bufnr)
           local link_text = string.format("[%s](%s)", selection.filename or selection.relpath, selection.relpath)
           vim.api.nvim_put({ link_text }, "c", true, true)
         end
-        map("n", "<M-i>", function()
+        map("n", config.telescope_insert_link_keybind, function()
           local selection = action_state.get_selected_entry()
           insert_link(selection)
         end)
-        map("i", "<M-i>", function()
+        map("i", config.telescope_insert_link_keybind, function()
           local selection = action_state.get_selected_entry()
           insert_link(selection)
         end)
