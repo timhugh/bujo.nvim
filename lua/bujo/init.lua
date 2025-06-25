@@ -1,20 +1,5 @@
 local M = {}
-
-local config = {
-  journal_dir = vim.fn.expand("~/.journal"),
-  entries_dir = "entries",
-  entries_name_template = "%Y/%m-%V.md", -- e.g., 2023/10-42.md for week 42 of 2023 in October
-  notes_dir = "notes",
-  projects_dir = "projects",
-  templates_dir = "templates",
-}
-
-function M.setup(user_config)
-  -- TODO: we should validate the config to make sure e.g. directories are writable and safe
-  if user_config then
-    config = vim.tbl_deep_extend("force", config, user_config)
-  end
-end
+local config = require("bujo.config")
 
 local commands = {
   ["now"] = require("bujo.now").now,
@@ -22,14 +7,18 @@ local commands = {
   ["find"] = require("bujo.find").find,
 }
 
-function M.register_commands()
+function M.setup(user_config)
+  config.setup(user_config)
+end
+
+local function register_commands()
   vim.api.nvim_create_user_command("Bujo", function(opts)
     local arg = opts.args or "now"
     if not commands[arg] then
       vim.notify("Unknown :Bujo command: " .. arg, vim.log.levels.ERROR)
       return
     end
-    commands[arg](config)
+    commands[arg]()
   end, {
     nargs = "?",
     complete = function()
@@ -38,7 +27,7 @@ function M.register_commands()
   })
 end
 
-M.register_commands()
+register_commands()
 
 return M
 
