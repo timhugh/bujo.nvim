@@ -15,9 +15,11 @@ function M.setup(user_config)
     config = vim.tbl_deep_extend("force", config, user_config)
   end
 end
+
 local commands = {
   ["now"] = require("bujo.now").now,
   ["note"] = require("bujo.note").note,
+  ["find"] = require("bujo.find").find,
 }
 
 function M.register_commands()
