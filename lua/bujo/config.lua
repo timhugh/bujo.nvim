@@ -1,10 +1,20 @@
 local default_config = {
+  -- the root directory where you want to keep your markdown files
   journal_dir = vim.fn.expand("~/.journal"),
+
+  -- subdirectory where templates can be found
+  templates_dir = ".templates",
+
+  -- subdirectory in journal_dir where actual journal entries will be stored
   entries_dir = "entries",
-  entries_name_template = "%Y/%m-%V.md", -- e.g., 2023/10-42.md for week 42 of 2023 in October
+  -- a lua date template for journal entry files. subdirectories are supported e.g.:
+  --   "%Y/%m-%V" will create a file for each week like ~/.journal/entries/2025/06-26.md
+  --   "%Y/%m/%d" will create a file for each day like ~/.journal/entries/2025/06/25.md
+  --   "%Y-%m-%d" will create a file for each day like ~/.journal/entries/2025-06-25.md
+  entries_name_template = "%Y/%m-%V",
+
+  -- subdirectory in journal_dir where notes will be stored
   notes_dir = "notes",
-  projects_dir = "projects",
-  templates_dir = "templates",
 }
 
 local M = vim.tbl_deep_extend("force", {}, default_config)
