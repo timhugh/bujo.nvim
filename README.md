@@ -37,7 +37,7 @@ bujo.nvim provides user commands and default keybinds for all of its functions. 
 
 Default keybind config: `now_keybind = "<leader>nn"`
 
-Open the spread for your current time period. By default, this will be one file per week, stored in `~/.journal/entries/<year>/<month>-<week_number>.md`. See the configuration section if you would like to change the cadence.
+Open the spread for your current time period. By default, this will be one file per week, stored in `~/.journal/entries/<year>/<month>-<week_number>.md`. See the [Configuration](#Configuration) section if you would like to change the cadence.
 
 ### `:Bujo note`
 
