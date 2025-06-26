@@ -1,8 +1,9 @@
-local default_config = {
+BujoConfig = {}
+
+local defaults = {
   -- the root directory where you want to keep your markdown files
   journal_dir = vim.fn.expand("~/.journal"),
-
-  -- subdirectory where templates can be found
+  -- subdirectory where etlua templates can be found
   templates_dir = ".templates",
 
   -- subdirectory in journal_dir where actual journal entries will be stored
@@ -12,7 +13,9 @@ local default_config = {
   --   "%Y/%m/%d" will create a file for each day like ~/.journal/entries/2025/06/25.md
   --   "%Y-%m-%d" will create a file for each day like ~/.journal/entries/2025-06-25.md
   entries_name_template = "%Y/%m-%V",
-
+  -- specify an etlua template file in the templates_dir to execute when creating a new entry
+  -- if set to false, no template will be used and an empty file will be created
+  entries_template = false,
   -- subdirectory in journal_dir where notes will be stored
   notes_dir = "notes",
 
@@ -20,13 +23,11 @@ local default_config = {
   telescope_insert_link_keybind = "<M-i>",
 }
 
-local M = vim.tbl_deep_extend("force", {}, default_config)
+BujoConfig.options = vim.deepcopy(BujoConfig.options)
 
-function M.setup(user_config)
-  -- TODO: we should validate the config to make sure e.g. directories are writable and safe
-  if user_config then
-    vim.tbl_deep_extend("force", M, user_config)
-  end
+function BujoConfig.setup(options)
+  BujoConfig.options = vim.deepcopy(vim.tbl_deep_extend("keep", options or {}, defaults or {}))
+  return BujoConfig.options
 end
 
-return M
+return BujoConfig

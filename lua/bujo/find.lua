@@ -35,7 +35,9 @@ end
 
 return {
   find = function()
-    local journal_root = config.journal_dir
+    local opts = config.options
+
+    local journal_root = opts.journal_dir
     local files = scan_dir(journal_root)
     if #files == 0 then
       vim.notify("No Markdown files found in journal directory: " .. journal_root, vim.log.levels.WARN)
@@ -76,11 +78,11 @@ return {
           local link_text = string.format("[%s](%s)", selection.filename or selection.relpath, selection.relpath)
           vim.api.nvim_put({ link_text }, "c", true, true)
         end
-        map("n", config.telescope_insert_link_keybind, function()
+        map("n", opts.telescope_insert_link_keybind, function()
           local selection = action_state.get_selected_entry()
           insert_link(selection)
         end)
-        map("i", config.telescope_insert_link_keybind, function()
+        map("i", opts.telescope_insert_link_keybind, function()
           local selection = action_state.get_selected_entry()
           insert_link(selection)
         end)

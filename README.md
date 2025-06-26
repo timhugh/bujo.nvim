@@ -1,6 +1,6 @@
 # bujo.nvim
 
-A simple implementation of a bullet journal accessible from any neovim session!
+A markdown bullet journal accessible from any neovim session!
 
 Featuring:
 

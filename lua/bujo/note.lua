@@ -3,7 +3,9 @@ local config = require("bujo.config")
 
 return {
   note = function()
-    local notes_dir = vim.fn.join({ config.journal_dir, config.notes_dir }, "/")
+    local opts = config.options
+
+    local notes_dir = vim.fn.join({ opts.journal_dir, opts.notes_dir }, "/")
     fs.ensure(notes_dir)
     vim.ui.input({ prompt = "New note name: " }, function(input)
       if input and input ~= "" then
