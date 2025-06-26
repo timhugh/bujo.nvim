@@ -5,6 +5,7 @@ local commands = {
   ["now"] = require("bujo.now").now,
   ["note"] = require("bujo.note").note,
   ["find"] = require("bujo.find").find,
+  ["follow"] = require("bujo.follow").follow,
 }
 
 function M.setup(user_config)
