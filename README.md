@@ -25,6 +25,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
     lazy = true,
     dependencies = {
       "nvim-telescope/telescope.nvim",
+      "leafo/etlua",
     },
     opts = {},
   },
@@ -36,7 +37,7 @@ bujo.nvim provides user commands and default keybinds for all of its functions. 
 
 ### `:Bujo now`
 
-Default keybind: `now_keybind = "<leader>nn",`
+Default keybind: `now_keybind = "<leader>nn"`
 
 Open the spread for your current time period. By default, this will be one file per week, stored in `~/.journal/entries/<year>/<month>-<week_number>.md`. See the configuration section if you would like to change the cadence.
 
@@ -68,7 +69,7 @@ Toggles the markdown checkbox on the current line between unchecked `[ ]` and ch
 
 ## Configuration
 
-No configuration is necessary for bujo.nvim to work out of the box. By default, it will create weekly spreads in the ~/.journal directory. You can see the default settings in [config.lua](/lua/bujo/config.lua), and override any of them in your setup:
+No configuration is necessary for bujo.nvim to work out of the box. By default, it will create weekly spreads in the `~/.journal` directory. You can see the default settings in [config.lua](/lua/bujo/config.lua), and override any of them in your setup:
 
 Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 ```
