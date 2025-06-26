@@ -13,7 +13,11 @@ return {
       return
     end
 
-    local template = etlua.compile(table.concat(template_content, "\n"))
+    local template, err = etlua.compile(table.concat(template_content, "\n"))
+    if err then
+      vim.notify("Failed to compile template: " .. template_name .. ": " .. err, vim.log.levels.ERROR)
+      return
+    end
 
     local rendered_content = template({
       config = opts,
