@@ -1,10 +1,10 @@
 local finders = require("telescope.finders")
 local pickers = require("telescope.pickers")
+local make_entry = require("telescope.make_entry")
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 local conf = require("telescope.config").values
-
-local config = require("bujo.config")
+local bujo_config = require("bujo.config")
 
 local function scan_dir(dir)
   local results = {}
@@ -34,57 +34,42 @@ local function scan_dir(dir)
 end
 
 return {
-  find = function()
-    local opts = config.options
-
-    local journal_root = opts.journal_dir
+  find = function(opts)
+    local config = bujo_config.options
+    opts = opts or {}
+    opts.entry_maker = opts.entry_maker or make_entry.gen_from_file(opts)
+    local journal_root = config.journal_dir
     local files = scan_dir(journal_root)
     if #files == 0 then
       vim.notify("No Markdown files found in journal directory: " .. journal_root, vim.log.levels.WARN)
       return
     end
 
-    pickers.new({}, {
-      prompt_title = "Bujo Notes",
-      finder = finders.new_table {
+    pickers.new(opts, {
+      prompt_title = opts.prompt_title or "Bujo: Find Journal Entries",
+      cwd = journal_root,
+      finder = finders.new_table({
         results = files,
-        entry_maker = function(entry)
-          local relative_path = entry:gsub("^" .. vim.pesc(journal_root) .. "/?", "")
-          local filename = vim.fn.fnamemodify(entry, ":t")
-          return {
-            value = entry,
-            display = relative_path,
-            ordinal = relative_path,
-            filename = filename,
-            relpath = relative_path,
-          }
-        end,
-      },
-      sorter = conf.generic_sorter({}),
+        entry_maker = make_entry.gen_from_file({ cwd = journal_root }),
+      }),
+      sorter = conf.file_sorter(opts),
+      previewer = conf.file_previewer(opts),
       attach_mappings = function(prompt_bufnr, map)
-        -- Default action opens the selected file in a new buffer
-        actions.select_default:replace(function()
-          local selection = action_state.get_selected_entry()
-          actions.close(prompt_bufnr)
-          if selection then
-            vim.cmd("edit " .. vim.fn.fnameescape(selection.value))
-          end
-        end)
-
-        -- Insert a markdown link to the selected file in the current buffer
-        local function insert_link(selection)
+        local function insert_markdown_link(selection)
           if not selection then return end
           actions.close(prompt_bufnr)
-          local link_text = string.format("[%s](%s)", selection.filename or selection.relpath, selection.relpath)
-          vim.api.nvim_put({ link_text }, "c", true, true)
+          local relative_path = selection.filename:gsub("^" .. vim.pesc(journal_root) .. "/?", "")
+          local filename = vim.fn.fnamemodify(selection.filename, ":t")
+          local link_text = string.format("[%s](%s)", filename, relative_path)
+          vim.api.nvim_put({ link_text }, "c", false, true)
         end
-        map("n", opts.telescope_insert_link_keybind, function()
+        map("n", config.telescope_insert_link_keybind, function()
           local selection = action_state.get_selected_entry()
-          insert_link(selection)
+          insert_markdown_link(selection)
         end)
-        map("i", opts.telescope_insert_link_keybind, function()
+        map("i", config.telescope_insert_link_keybind, function()
           local selection = action_state.get_selected_entry()
-          insert_link(selection)
+          insert_markdown_link(selection)
         end)
 
         return true
