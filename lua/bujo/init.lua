@@ -6,7 +6,7 @@ local commands = {
   ["note"] = require("bujo.note").note,
   ["find"] = require("bujo.find").find,
   ["follow"] = require("bujo.follow").follow,
-  ["togglecheck"] = require("bujo.togglecheck").togglecheck,
+  ["toggle_check"] = require("bujo.toggle_check").toggle_check,
 }
 
 function M.setup(user_config)

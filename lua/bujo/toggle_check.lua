@@ -1,8 +1,7 @@
 local M = {}
 
 local config = require("bujo.config")
-
-function M.togglecheck()
+function M.toggle_check()
   local line = vim.api.nvim_get_current_line()
   local state = line:match("^%s*-%s%[(.*)%]")
 
@@ -26,7 +25,7 @@ function M.install()
   local keybind = config.options.toggle_check_keybind
   if keybind then
     vim.keymap.set("n", keybind, function()
-      M.togglecheck()
+      M.toggle_check()
     end, {
       noremap = true,
       silent = true,
