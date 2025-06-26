@@ -41,7 +41,9 @@ function M.follow()
 
   if link_path then
     local full_path = vim.fn.join({ journal_dir, link_path }, "/")
-    vim.cmd("edit " .. vim.fn.fnameescape(full_path))
+    vim.schedule(function()
+      vim.cmd("edit " .. vim.fn.fnameescape(full_path))
+    end)
     return ""
   else
     -- fall through to the next handler for the keybind
