@@ -11,6 +11,10 @@ local commands = {
 
 function M.setup(user_config)
   config.setup(user_config)
+
+  for name, _ in pairs(commands) do
+    require("bujo." .. name).install()
+  end
 end
 
 local function register_commands()

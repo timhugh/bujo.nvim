@@ -14,6 +14,7 @@ Featuring:
 Coming soon:
 
 - executable codeblocks using [michaelb/sniprun](https://github.com/michaelb/sniprun)
+	- the default single-line behavior of sniprun works, but automatically code-fencing blocks and displaying multiline output does not
 
 ## Installation
 
@@ -31,23 +32,37 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ## Usage
 
+bujo.nvim provides user commands and default keybinds for all of its functions. See the [Configuration](#Configuration) section if you would like to change any of the default keybinds.
+
 ### `:Bujo now`
+
+Default keybind: `now_keybind = "<leader>nn",`
 
 Open the spread for your current time period. By default, this will be one file per week, stored in `~/.journal/entries/<year>/<month>-<week_number>.md`. See the configuration section if you would like to change the cadence.
 
 ### `:Bujo note`
 
+Default keybind: `note_keybind = "<leader>nN"`
+
 Will prompt for a name and create a new file in `~/.journal/notes`.
 
 ### `:Bujo find / :Telescope bujo`
 
-Opens a Telescope picker for all of your entries and notes for easy navigation. Selecting a file will open it in a new buffer. `<M-i>` will insert a markdown link to that file in the current buffer.
+Default keybind: `telescope_picker_keybind = "<leader>nf"`
+
+Opens a Telescope picker for all of your entries and notes for easy navigation. Selecting a file will open it in a new buffer. 
+
+To insert a link to the selected file in the current buffer: `telescope_insert_link_keybind = "<M-i>"`
 
 ### `:Bujo follow`
+
+Default keybind: `follow_link_keybind = "gf"`
 
 Finds a markdown link in the current line (if there are multiple, it will select the one under your cursor) and opens the linked note in a new buffer. This allows you to have relative links like `notes/my_current_project.md` or `entries/2025-06-25.md` relative to your journal root.
 
 ### `:Bujo togglecheck`
+
+Default keybind: `toggle_check_keybind = "<C-Space>"`
 
 Toggles the markdown checkbox on the current line between unchecked `[ ]` and checked `[x]`.
 

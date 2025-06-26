@@ -19,8 +19,20 @@ local defaults = {
   -- subdirectory in journal_dir where notes will be stored
   notes_dir = "notes",
 
+  -- keybind for creating or opening a journal entry for the current date span
+  now_keybind = "<leader>nn",
+  -- keybind for creating a new note (will prompt for a name)
+  note_keybind = "<leader>nN",
+  -- keybind for opening the journal entry finder
+  telescope_picker_keybind = "<leader>nf",
   -- keybind for inserting markdown links from telescope picker
   telescope_insert_link_keybind = "<M-i>",
+  -- keybind for following markdown links
+  --   if there is only one link on the line, it will be followed
+  --   if there are multiple links, the link under the cursor will be followed
+  follow_link_keybind = "gf",
+  -- keybind for toggling checkboxes in journal files
+  toggle_check_keybind = "<C-Space>",
 }
 
 BujoConfig.options = vim.deepcopy(BujoConfig.options)
