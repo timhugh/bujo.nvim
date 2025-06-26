@@ -1,9 +1,10 @@
 local M = {}
 
 local config = require("bujo.config")
+
 function M.toggle_check()
   local line = vim.api.nvim_get_current_line()
-  local state = line:match("^%s*-%s%[(.*)%]")
+  local state = line:match("^%s*-%s%[(.)%]")
 
   if not state then
     vim.notify("No checkbox found on this line", vim.log.levels.WARN)
