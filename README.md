@@ -4,17 +4,15 @@ A markdown bullet journal accessible from any neovim session!
 
 Featuring:
 
+- uses standard markdown files so you're not locked in
 - access and edit your notes from any neovim instance
 - define templates for new notes using [leafo/etlua](https://github.com/leafo/etlua)
-- create arbitrary notes on the fly
-- markdown links to navigate between files
-- open a telescope picker to quickly navigate to notes or past/future spreads
-- quickly insert links into your current buffer
+- provides a [telescope](https://github.com/nvim-telescope/telescope.nvim) extension to easily find notes and insert links
 
 Coming soon:
 
 - executable codeblocks using [michaelb/sniprun](https://github.com/michaelb/sniprun)
-	- the default single-line behavior of sniprun works, but automatically code-fencing blocks and displaying multiline output does not
+	- the default visual selection behavior of sniprun works, but automatically code-fencing blocks and displaying multiline output does not
 
 ## Installation
 
@@ -37,19 +35,19 @@ bujo.nvim provides user commands and default keybinds for all of its functions. 
 
 ### `:Bujo now`
 
-Default keybind: `now_keybind = "<leader>nn"`
+Default keybind config: `now_keybind = "<leader>nn"`
 
 Open the spread for your current time period. By default, this will be one file per week, stored in `~/.journal/entries/<year>/<month>-<week_number>.md`. See the configuration section if you would like to change the cadence.
 
 ### `:Bujo note`
 
-Default keybind: `note_keybind = "<leader>nN"`
+Default keybind config: `note_keybind = "<leader>nN"`
 
 Will prompt for a name and create a new file in `~/.journal/notes`.
 
 ### `:Bujo find / :Telescope bujo`
 
-Default keybind: `telescope_picker_keybind = "<leader>nf"`
+Default keybind config: `telescope_picker_keybind = "<leader>nf"`
 
 Opens a Telescope picker for all of your entries and notes for easy navigation. Selecting a file will open it in a new buffer. 
 
@@ -57,13 +55,19 @@ To insert a link to the selected file in the current buffer: `telescope_insert_l
 
 ### `:Bujo follow`
 
-Default keybind: `follow_link_keybind = "gf"`
+Default keybind config: `follow_journal_link_keybind = "<M-CR>"`
 
 Finds a markdown link in the current line (if there are multiple, it will select the one under your cursor) and opens the linked note in a new buffer. This allows you to have relative links like `notes/my_current_project.md` or `entries/2025-06-25.md` relative to your journal root.
 
+### `:Bujo exec`
+
+Default keybind config: `exec_link_keybind = "gx"`
+
+Finds a markdown link in the current line (if there are multiple, it will select the one under your cursor) and opens the link with the default system handler. This is the normal behavior of "gx" in default neovim mappings, but this command doesn't require your cursor to be inside the link if there is only one link on the line.
+
 ### `:Bujo toggle_check`
 
-Default keybind: `toggle_check_keybind = "<C-Space>"`
+Default keybind config: `toggle_check_keybind = "<C-Space>"`
 
 Toggles the markdown checkbox on the current line between unchecked `[ ]` and checked `[x]`.
 

@@ -34,8 +34,7 @@ local function get_link_path()
 
   return link_path
 end
-
-function M.follow()
+function M.follow_journal_link()
   local journal_dir = config.options.journal_dir
   local link_path = get_link_path()
 
@@ -48,21 +47,48 @@ function M.follow()
   else
     -- fall through to the next handler for the keybind
     --   this allows overriding standard keybinds like `gf` or `<CR>` without affecting their normal behavior
-    return config.options.follow_link_keybind
+    return config.options.follow_journal_link_keybind
+  end
+end
+
+function M.exec_link()
+  local link_path = get_link_path()
+
+  if link_path then
+    vim.schedule(function()
+      vim.cmd(string.format("silent! call netrw#BrowseX('%s', 'file')", vim.fn.fnameescape(link_path)))
+    end)
+    return ""
+  else
+    -- fall through to the next handler for the keybind
+    --   this allows overriding standard keybinds like `gx` without affecting their normal behavior
+    return config.options.exec_link_keybind
   end
 end
 
 function M.install()
-  local keybind = config.options.follow_link_keybind
-  if keybind then
-    vim.keymap.set("n", keybind, function()
-      return M.follow()
+  local follow_journal_link_keybind = config.options.follow_journal_link_keybind
+  if follow_journal_link_keybind then
+    vim.keymap.set("n", follow_journal_link_keybind, function()
+      return M.follow_journal_link()
     end, {
       -- expr = true allows follow to return the keybind if a link isn't found and execute the next handler
       expr = true,
       noremap = true,
       silent = true,
       desc = "Bujo: Follow markdown link"
+    })
+  end
+  local exec_link_keybind = config.options.exec_link_keybind
+  if exec_link_keybind then
+    vim.keymap.set("n", exec_link_keybind, function()
+      return M.exec_link()
+    end, {
+      -- expr = true allows exec to return the keybind if a link isn't found and execute the next handler
+      expr = true,
+      noremap = true,
+      silent = true,
+      desc = "Bujo: Execute markdown link in default system handler"
     })
   end
 end

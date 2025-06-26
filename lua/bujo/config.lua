@@ -18,7 +18,9 @@ local defaults = {
   entries_template = false,
   -- subdirectory in journal_dir where notes will be stored
   notes_dir = "notes",
-
+  -- #### KEYBINDS ####
+  -- all keybinds can be set to false to disable them
+  --
   -- keybind for creating or opening a journal entry for the current date span
   now_keybind = "<leader>nn",
   -- keybind for creating a new note (will prompt for a name)
@@ -27,10 +29,15 @@ local defaults = {
   telescope_picker_keybind = "<leader>nf",
   -- keybind for inserting markdown links from telescope picker
   telescope_insert_link_keybind = "<M-i>",
-  -- keybind for following markdown links
+  -- keybind for following journal markdown links. this speficially allows you to use relative links
+  -- like `notes/my_note.md` to refer to a note at `~/.journal/notes/my_note.md` and still follow it
   --   if there is only one link on the line, it will be followed
   --   if there are multiple links, the link under the cursor will be followed
-  follow_link_keybind = "gf",
+  follow_journal_link_keybind = "<M-CR>",
+  -- keybind for opening a link with the default system handler. This is identical to the default "gx"
+  -- behavior of vim, but it applies the same logic as the follow_journal_link_keybind to find links in the current line
+  -- so that you don't have to place your cursor directly on the link if there is only one link on the line
+  exec_link_keybind = "gx",
   -- keybind for toggling checkboxes in journal files
   toggle_check_keybind = "<C-Space>",
 }

@@ -1,20 +1,26 @@
 local M = {}
 local config = require("bujo.config")
-
+local bujo_now = require("bujo.now")
+local bujo_note = require("bujo.note")
+local bujo_find = require("bujo.find")
+local bujo_follow = require("bujo.follow")
+local bujo_toggle_check = require("bujo.toggle_check")
 local commands = {
-  ["now"] = require("bujo.now").now,
-  ["note"] = require("bujo.note").note,
-  ["find"] = require("bujo.find").find,
-  ["follow"] = require("bujo.follow").follow,
-  ["toggle_check"] = require("bujo.toggle_check").toggle_check,
+  ["now"] = bujo_now.now,
+  ["note"] = bujo_note.note,
+  ["find"] = bujo_find.find,
+  ["follow"] = bujo_follow.follow_journal_link,
+  ["exec"] = bujo_follow.exec_link,
+  ["toggle_check"] = bujo_toggle_check.toggle_check,
 }
-
 function M.setup(user_config)
   config.setup(user_config)
 
-  for name, _ in pairs(commands) do
-    require("bujo." .. name).install()
-  end
+  bujo_now.install()
+  bujo_note.install()
+  bujo_find.install()
+  bujo_follow.install()
+  bujo_toggle_check.install()
 end
 
 local function register_commands()
