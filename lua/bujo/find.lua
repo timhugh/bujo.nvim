@@ -37,7 +37,7 @@ end
 function M.find(opts)
   opts = opts or {}
   opts.entry_maker = opts.entry_maker or make_entry.gen_from_file(opts)
-  local journal_root = config.options.journal.subdirectory
+  local journal_root = config.options.base_directory
   local files = scan_dir(journal_root)
   if #files == 0 then
     vim.notify("No Markdown files found in journal directory: " .. journal_root, vim.log.levels.WARN)
