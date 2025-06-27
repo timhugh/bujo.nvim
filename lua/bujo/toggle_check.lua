@@ -15,17 +15,14 @@ function M.toggle_check()
   if state == "x" then
     new_state = " "
   end
-
-  local new_line = line:gsub("%[.*%]", string.format("[%s]", new_state), 1)
+  local new_line = line:gsub("%[.%]", string.format("[%s]", new_state), 1)
   vim.api.nvim_set_current_line(new_line)
 end
 
 function M.install()
   local keybind = config.options.toggle_check_keybind
   if keybind then
-    vim.keymap.set("n", keybind, function()
-      M.toggle_check()
-    end, {
+    vim.keymap.set("n", keybind, M.toggle_check, {
       noremap = true,
       silent = true,
       desc = "Bujo: Toggle checkbox state",
