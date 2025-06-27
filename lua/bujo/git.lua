@@ -34,8 +34,9 @@ local function run_command_in_journal_dir(command)
 end
 
 function M.process_queue()
+  local delay = tonumber(config.options.auto_commit_delay) or 1000
   M._save_timer:stop()
-  M._save_timer:start(500, 0, vim.schedule_wrap(function()
+  M._save_timer:start(delay, 0, vim.schedule_wrap(function()
     local should_commit = config.options.auto_commit_journal
     local should_push = config.options.auto_push_journal
 

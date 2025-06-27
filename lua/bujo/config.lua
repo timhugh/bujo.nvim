@@ -23,6 +23,8 @@ local defaults = {
   -- commit and push changes when buffers inside the journal_dir are saved
   auto_commit_journal = false,
   auto_push_journal = false,
+  -- the delay in milliseconds to wait before committing changes after a buffer is saved
+  auto_commit_delay = 1000,
 
   -- #### KEYBINDS ####
   -- all keybinds can be set to false to disable them
