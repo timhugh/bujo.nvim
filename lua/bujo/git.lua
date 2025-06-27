@@ -2,7 +2,6 @@ local M = {}
 
 local config = require("bujo.config")
 
-M._save_queue = {}
 M._save_timer = vim.uv.new_timer()
 
 local function is_journal_file(file_path)
@@ -30,7 +29,7 @@ local function run_command_in_journal_dir(command)
     vim.notify("Bujo: command failed: " .. table.concat(process.cmd, " ") .. " - " .. result.stderr, vim.log.levels.ERROR)
     return false
   end
-  return true
+  return result.stdout
 end
 
 function M.process_queue()
@@ -44,31 +43,27 @@ function M.process_queue()
       return
     end
 
-    if #M._save_queue == 0 then
+    local dirty = run_command_in_journal_dir({ "git", "status", "--porcelain" })
+    if not dirty or dirty == "" then
       return
     end
 
     vim.notify("Bujo: committing changes to journal", vim.log.levels.INFO)
-    for _, file in ipairs(M._save_queue) do
-      if not run_command_in_journal_dir({"git", "add", file}) then return end
-    end
-    if not run_command_in_journal_dir({"git", "commit", "-m", get_commit_message()}) then return end
+    if not run_command_in_journal_dir({ "git", "add", "." }) then return end
+    if not run_command_in_journal_dir({ "git", "commit", "-m", get_commit_message() }) then return end
 
     if should_push then
       vim.notify("Bujo: pushing changes to remote", vim.log.levels.INFO)
       if not run_command_in_journal_dir({"git", "push"}) then return end
     end
-
-    M._save_queue = {}
   end))
 end
 
 function M.commit_and_push()
   local current_file = get_current_journal_file(vim.api.nvim_get_current_buf())
   if current_file then
-    table.insert(M._save_queue, current_file)
+    M.process_queue()
   end
-  M.process_queue()
 end
 
 function M.install()

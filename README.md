@@ -80,7 +80,9 @@ Disabled by default:
   auto_commit_delay = 1000,
 ```
 
-When `auto_commit_journal` is enabled, saving any file inside your journal directory will automatically create a git commit with just that file with a timestamp as the message. There is a debounce to prevent multiple commits for rapid writes, e.g. when using `:wa` that defaults to 1000ms but can be configured using `auto_commit_delay`.
+When `auto_commit_journal` is enabled, saving any file inside your journal directory will automatically git add and git commit your entire journal with a timestamp as the message. *Note that we are committing the entire journal to avoid the complexity of gracefully handling files being deleted or renamed.*
+
+There is a debounce to prevent multiple commits for rapid writes, e.g. when using `:wa` that defaults to 1000ms but can be configured using `auto_commit_delay`.
 
 When `auto_push_journal` is enabled, `git push` will automatically run after the commit is created.
 
