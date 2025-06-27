@@ -1,7 +1,7 @@
-local toggle = require("bujo.toggle_check")
+local markdown = require("bujo.markdown")
 local stub = require("luassert.stub")
 
-describe("bujo.toggle_check", function()
+describe("markdown.toggle_check", function()
   local get_current_line_stub
   local set_current_line_stub
 
@@ -17,32 +17,32 @@ describe("bujo.toggle_check", function()
 
   it("toggles an unchecked checkbox to checked", function()
     get_current_line_stub.returns("- [ ] Task 1")
-    toggle.toggle_check()
+    markdown.toggle_check()
     assert.stub(set_current_line_stub).was_called_with("- [x] Task 1")
   end)
 
   it("toggles a checked checkbox to unchecked", function()
     get_current_line_stub.returns("- [x] Task 1")
-    toggle.toggle_check()
+    markdown.toggle_check()
     assert.stub(set_current_line_stub).was_called_with("- [ ] Task 1")
   end)
 
   it("toggles an unknown checkbox state to checked", function()
     get_current_line_stub.returns("- [a] Task 1")
-    toggle.toggle_check()
+    markdown.toggle_check()
     assert.stub(set_current_line_stub).was_called_with("- [x] Task 1")
   end)
 
   it("does not affect markdown links on the same line", function()
     get_current_line_stub.returns("- [ ] Task 1 [link](http://example.com)")
-    toggle.toggle_check()
+    markdown.toggle_check()
     assert.stub(set_current_line_stub).was_called_with("- [x] Task 1 [link](http://example.com)")
   end)
 
   it("does not affect markdown links in bulleted lists", function()
     get_current_line_stub.returns("- [link](http://example.com)")
     local notify_stub = stub(vim, "notify")
-    toggle.toggle_check()
+    markdown.toggle_check()
     assert.stub(set_current_line_stub).was_not_called()
     assert.stub(notify_stub).was_called()
     notify_stub:revert()
@@ -51,14 +51,14 @@ describe("bujo.toggle_check", function()
   it("warns if no checkbox is found", function()
     get_current_line_stub.returns("No checkbox here")
     local notify_stub = stub(vim, "notify")
-    toggle.toggle_check()
+    markdown.toggle_check()
     assert.stub(set_current_line_stub).was_not_called()
     assert.stub(notify_stub).was_called()
     notify_stub:revert()
   end)
 end)
 
-describe("bujo.toggle_check.install", function()
+describe("markdown.install", function()
   local keymap_set_stub
 
   before_each(function()
@@ -69,18 +69,28 @@ describe("bujo.toggle_check.install", function()
     keymap_set_stub:revert()
   end)
 
-  it("sets the keybind for toggling checkboxes", function()
+  it("sets all keybinds by default", function()
     local config = require("bujo.config")
-    config.setup({
-      markdown = {
-        toggle_check_keybind = "<leader>tc",
-      },
-    })
-    toggle.install()
-    assert.stub(keymap_set_stub).was_called_with("n", "<leader>tc", toggle.toggle_check, {
+    config.setup()
+
+    markdown.install()
+
+    assert.stub(keymap_set_stub).was_called_with("n", "<C-Space>", markdown.toggle_check, {
       noremap = true,
       silent = true,
       desc = "Bujo: Toggle checkbox state",
+    })
+    assert.stub(keymap_set_stub).was_called_with("n", "<M-CR>", markdown.follow_journal_link, {
+      expr = true,
+      noremap = true,
+      silent = true,
+      desc = "Bujo: Follow markdown link",
+    })
+    assert.stub(keymap_set_stub).was_called_with("n", "gx", markdown.follow_external_link, {
+      expr = true,
+      noremap = true,
+      silent = true,
+      desc = "Bujo: Execute markdown link in default system handler",
     })
   end)
 end)

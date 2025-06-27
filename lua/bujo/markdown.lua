@@ -2,6 +2,23 @@ local M = {}
 
 local config = require("bujo.config")
 
+function M.toggle_check()
+  local line = vim.api.nvim_get_current_line()
+  local state = line:match("^%s*-%s%[(.)%]")
+
+  if not state then
+    vim.notify("No checkbox found on this line", vim.log.levels.WARN)
+    return
+  end
+
+  local new_state = "x"
+  if state == "x" then
+    new_state = " "
+  end
+  local new_line = line:gsub("%[.%]", string.format("[%s]", new_state), 1)
+  vim.api.nvim_set_current_line(new_line)
+end
+
 local function get_markdown_links(line)
   local links = {}
   for start, text, path, finish in line:gmatch('()(%[.-%]%((.-)%)())') do
@@ -54,7 +71,7 @@ function M.follow_journal_link()
   end
 end
 
-function M.exec_link()
+function M.follow_external_link()
   local link_path = get_link_path()
 
   if link_path then
@@ -70,11 +87,18 @@ function M.exec_link()
 end
 
 function M.install()
+  local toggle_check_keybind = config.options.markdown.toggle_check_keybind
+  if toggle_check_keybind then
+    vim.keymap.set("n", toggle_check_keybind, M.toggle_check, {
+      noremap = true,
+      silent = true,
+      desc = "Bujo: Toggle checkbox state",
+    })
+  end
+
   local follow_journal_link_keybind = config.options.markdown.follow_journal_link_keybind
   if follow_journal_link_keybind then
-    vim.keymap.set("n", follow_journal_link_keybind, function()
-      return M.follow_journal_link()
-    end, {
+    vim.keymap.set("n", follow_journal_link_keybind, M.follow_journal_link, {
       -- expr = true allows follow to return the keybind if a link isn't found and execute the next handler
       expr = true,
       noremap = true,
@@ -82,11 +106,10 @@ function M.install()
       desc = "Bujo: Follow markdown link"
     })
   end
+
   local follow_external_link_keybind = config.options.markdown.follow_external_link_keybind
   if follow_external_link_keybind then
-    vim.keymap.set("n", follow_external_link_keybind, function()
-      return M.exec_link()
-    end, {
+    vim.keymap.set("n", follow_external_link_keybind, M.follow_external_link, {
       -- expr = true allows exec to return the keybind if a link isn't found and execute the next handler
       expr = true,
       noremap = true,
