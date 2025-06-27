@@ -4,9 +4,7 @@ local fs = require("bujo.fs_util")
 local config = require("bujo.config")
 
 function M.note()
-  local opts = config.options
-
-  local notes_dir = vim.fn.join({ opts.journal_dir, opts.notes_dir }, "/")
+  local notes_dir = vim.fn.join({ config.options.base_directory, config.options.notes.subdirectory }, "/")
   fs.ensure(notes_dir)
   vim.ui.input({ prompt = "New note name: " }, function(input)
     if input and input ~= "" then
@@ -18,13 +16,11 @@ function M.note()
 end
 
 function M.now()
-  local opts = config.options
+  local journal_dir = vim.fn.join({ config.options.base_directory, config.options.journal.subdirectory }, "/")
+  fs.ensure(journal_dir)
 
-  local entries_dir = vim.fn.join({ opts.journal_dir, opts.entries_dir }, "/")
-  fs.ensure(entries_dir)
-
-  local current_file = os.date(opts.entries_name_template)
-  local current_file_path = vim.fn.join({ entries_dir, current_file }, "/") .. ".md"
+  local current_file = os.date(config.options.journal.filename_template)
+  local current_file_path = vim.fn.join({ journal_dir, current_file }, "/") .. ".md"
 
   local current_file_dir = vim.fn.fnamemodify(current_file_path, ":h")
   fs.ensure(current_file_dir)
@@ -32,11 +28,11 @@ function M.now()
   if vim.fn.filereadable(current_file_path) == 0 then
     local file = io.open(current_file_path, "w")
     if file then
-      if opts.entries_template and opts.entries_template ~= false then
-        require('bujo.templates').execute(opts.entries_template, current_file_path)
+      if config.options.journal.template and config.options.journal.template ~= false then
+        require('bujo.templates').execute(config.options.journal.template, current_file_path)
       end
     else
-      vim.notify("Failed to create entry file: " .. current_file_path, vim.log.levels.ERROR)
+      vim.notify("Failed to create journal file: " .. current_file_path, vim.log.levels.ERROR)
       return
     end
   end
@@ -44,7 +40,7 @@ function M.now()
 end
 
 function M.install()
-  local now_keybind = config.options.now_keybind
+  local now_keybind = config.options.journal.now_keybind
   if now_keybind then
     vim.keymap.set("n", now_keybind, function()
       M.now()
@@ -55,7 +51,7 @@ function M.install()
     })
   end
 
-  local note_keybind = config.options.note_keybind
+  local note_keybind = config.options.journal.note_keybind
   if note_keybind then
     vim.keymap.set("n", note_keybind, function()
       M.note()

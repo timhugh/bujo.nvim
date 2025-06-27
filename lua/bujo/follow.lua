@@ -1,5 +1,7 @@
-local config = require("bujo.config")
 local M = {}
+
+local config = require("bujo.config")
+
 local function get_markdown_links(line)
   local links = {}
   for start, text, path, finish in line:gmatch('()(%[.-%]%((.-)%)())') do
@@ -36,11 +38,11 @@ local function get_link_path()
 end
 
 function M.follow_journal_link()
-  local journal_dir = config.options.journal_dir
+  local base_dir = config.options.base_directory
   local link_path = get_link_path()
 
   if link_path then
-    local full_path = vim.fn.join({ journal_dir, link_path }, "/")
+    local full_path = vim.fn.join({ base_dir, link_path }, "/")
     vim.schedule(function()
       vim.cmd("edit " .. vim.fn.fnameescape(full_path))
     end)
@@ -48,7 +50,7 @@ function M.follow_journal_link()
   else
     -- fall through to the next handler for the keybind
     --   this allows overriding standard keybinds like `gf` or `<CR>` without affecting their normal behavior
-    return config.options.follow_journal_link_keybind
+    return config.options.markdown.follow_journal_link_keybind
   end
 end
 
@@ -63,12 +65,12 @@ function M.exec_link()
   else
     -- fall through to the next handler for the keybind
     --   this allows overriding standard keybinds like `gx` without affecting their normal behavior
-    return config.options.exec_link_keybind
+    return config.options.markdown.follow_external_link_keybind
   end
 end
 
 function M.install()
-  local follow_journal_link_keybind = config.options.follow_journal_link_keybind
+  local follow_journal_link_keybind = config.options.markdown.follow_journal_link_keybind
   if follow_journal_link_keybind then
     vim.keymap.set("n", follow_journal_link_keybind, function()
       return M.follow_journal_link()
@@ -80,9 +82,9 @@ function M.install()
       desc = "Bujo: Follow markdown link"
     })
   end
-  local exec_link_keybind = config.options.exec_link_keybind
-  if exec_link_keybind then
-    vim.keymap.set("n", exec_link_keybind, function()
+  local follow_external_link_keybind = config.options.markdown.follow_external_link_keybind
+  if follow_external_link_keybind then
+    vim.keymap.set("n", follow_external_link_keybind, function()
       return M.exec_link()
     end, {
       -- expr = true allows exec to return the keybind if a link isn't found and execute the next handler

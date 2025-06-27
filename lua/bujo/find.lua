@@ -6,8 +6,7 @@ local make_entry = require("telescope.make_entry")
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 local conf = require("telescope.config").values
-local bujo_config = require("bujo.config")
-
+local config = require("bujo.config")
 local function scan_dir(dir)
   local results = {}
   local scan = vim.loop.fs_scandir(dir)
@@ -36,10 +35,9 @@ local function scan_dir(dir)
 end
 
 function M.find(opts)
-  local config = bujo_config.options
   opts = opts or {}
   opts.entry_maker = opts.entry_maker or make_entry.gen_from_file(opts)
-  local journal_root = config.journal_dir
+  local journal_root = config.options.journal.subdirectory
   local files = scan_dir(journal_root)
   if #files == 0 then
     vim.notify("No Markdown files found in journal directory: " .. journal_root, vim.log.levels.WARN)
@@ -64,11 +62,11 @@ function M.find(opts)
         local link_text = string.format("[%s](%s)", filename, relative_path)
         vim.api.nvim_put({ link_text }, "c", false, true)
       end
-      map("n", config.telescope_insert_link_keybind, function()
+      map("n", config.options.picker.insert_link_keybind, function()
         local selection = action_state.get_selected_entry()
         insert_markdown_link(selection)
       end)
-      map("i", config.telescope_insert_link_keybind, function()
+      map("i", config.options.picker.insert_link_keybind, function()
         local selection = action_state.get_selected_entry()
         insert_markdown_link(selection)
       end)
@@ -79,7 +77,7 @@ function M.find(opts)
 end
 
 function M.install()
-  local keybind = bujo_config.options.telescope_picker_keybind
+  local keybind = config.options.picker.open_keybind
   if keybind then
     vim.keymap.set("n", keybind, function()
       return M.find()

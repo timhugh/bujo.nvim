@@ -35,39 +35,39 @@ bujo.nvim provides user commands and default keybinds for all of its functions. 
 
 ### `:Bujo now`
 
-Default keybind config: `now_keybind = "<leader>nn"`
+Default keybind config: `journal.now_keybind = "<leader>nn"`
 
 Open the spread for your current time period. By default, this will be one file per week, stored in `~/.journal/entries/<year>/<month>-<week_number>.md`. See the [Configuration](#Configuration) section if you would like to change the cadence.
 
 ### `:Bujo note`
 
-Default keybind config: `note_keybind = "<leader>nN"`
+Default keybind config: `journal.note_keybind = "<leader>nN"`
 
 Will prompt for a name and create a new file in `~/.journal/notes`.
 
 ### `:Bujo find / :Telescope bujo`
 
-Default keybind config: `telescope_picker_keybind = "<leader>nf"`
+Default keybind config: `picker.open_keybind = "<leader>nf"`
 
 Opens a Telescope picker for all of your entries and notes for easy navigation. Selecting a file will open it in a new buffer. 
 
-To insert a link to the selected file in the current buffer: `telescope_insert_link_keybind = "<M-i>"`
+To insert a link to the selected file in the current buffer: `picker.insert_link_keybind = "<M-i>"`
 
 ### `:Bujo follow`
 
-Default keybind config: `follow_journal_link_keybind = "<M-CR>"`
+Default keybind config: `markdown.follow_journal_link_keybind = "<M-CR>"`
 
 Finds a markdown link in the current line (if there are multiple, it will select the one under your cursor) and opens the linked note in a new buffer. This allows you to have relative links like `notes/my_current_project.md` or `entries/2025-06-25.md` relative to your journal root.
 
 ### `:Bujo exec`
 
-Default keybind config: `exec_link_keybind = "gx"`
+Default keybind config: `markdown.follow_external_link_keybind = "gx"`
 
 Finds a markdown link in the current line (if there are multiple, it will select the one under your cursor) and opens the link with the default system handler. This is the normal behavior of "gx" in default neovim mappings, but this command doesn't require your cursor to be inside the link if there is only one link on the line.
 
 ### `:Bujo toggle_check`
 
-Default keybind config: `toggle_check_keybind = "<C-Space>"`
+Default keybind config: `markdown.toggle_check_keybind = "<C-Space>"`
 
 Toggles the markdown checkbox on the current line between unchecked `[ ]` and checked `[x]`.
 
@@ -75,20 +75,24 @@ Toggles the markdown checkbox on the current line between unchecked `[ ]` and ch
 
 Disabled by default:
 ```
-  auto_commit_journal = false,
-  auto_push_journal = false,
-  auto_commit_delay = 1000,
+git = {
+  auto_commit = false,
+  auto_push = false,
+  debounce_ms = 1000,
+},
 ```
 
-When `auto_commit_journal` is enabled, saving any file inside your journal directory will automatically git add and git commit your entire journal with a timestamp as the message. *Note that we are committing the entire journal to avoid the complexity of gracefully handling files being deleted or renamed.*
+When `git.auto_commit` is enabled, saving any file inside your journal directory will automatically git add and git commit your entire journal with a timestamp as the message. *Note that we are committing the entire journal to avoid the complexity of gracefully handling files being deleted or renamed.*
 
-There is a debounce to prevent multiple commits for rapid writes, e.g. when using `:wa` that defaults to 1000ms but can be configured using `auto_commit_delay`.
+There is a debounce to prevent multiple commits for rapid writes, e.g. when using `:wa` that defaults to 1000ms but can be configured using `git.debounce_ms`.
 
-When `auto_push_journal` is enabled, `git push` will automatically run after the commit is created.
+When `git.auto_push` is enabled, `git push` will automatically run after the commit is created.
 
 ## Configuration
 
-No configuration is necessary for bujo.nvim to work out of the box. By default, it will create weekly spreads in the `~/.journal` directory. You can see the default settings in [config.lua](/lua/bujo/config.lua), and override any of them in your setup:
+No configuration is necessary for bujo.nvim to work out of the box. By default, it will create weekly spreads in the `~/.journal` directory. You can see the default settings in [config.lua](/lua/bujo/config.lua), and override any of them in your setup.
+
+If you would like to disable any of the default keybinds, simply set their value to `false`.
 
 Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 ```
@@ -96,8 +100,13 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
     "timhugh/bujo.nvim",
     ......
     opts = {
-      journal_dir = "~/my_journal",
-      entries_name_template = "%Y-%m-%d",
+      base_directory = "~/my_journal",
+      journal = {
+			  filename_template = "%Y-%m-%d",
+			},
+			markdown = {
+        follow_external_link_keybind = false,
+			},
     },
   },
 ```
@@ -105,7 +114,12 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 Or manually:
 ```
 require("bujo.nvim").setup({
-  journal_dir = "~/my_journal",
-  entries_name_template = "%Y-%m-%d",
+	base_directory = "~/my_journal",
+	journal = {
+		filename_template = "%Y-%m-%d",
+	},
+	{
+		follow_external_link_keybind = false,
+	},
 })
 ```

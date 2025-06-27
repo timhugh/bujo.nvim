@@ -20,7 +20,7 @@ function M.toggle_check()
 end
 
 function M.install()
-  local keybind = config.options.toggle_check_keybind
+  local keybind = config.options.markdown.toggle_check_keybind
   if keybind then
     vim.keymap.set("n", keybind, M.toggle_check, {
       noremap = true,

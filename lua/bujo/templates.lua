@@ -10,9 +10,7 @@ function M.execute(template_name, destination_file)
     return
   end
 
-  local opts = config.options
-
-  local template_path = vim.fn.join({ opts.journal_dir, opts.templates_dir, template_name }, "/")
+  local template_path = vim.fn.join({ config.options.base_directory, config.options.templates_dir, template_name }, "/")
   local template_content = vim.fn.readfile(template_path)
 
   if not template_content or #template_content == 0 then
@@ -27,7 +25,7 @@ function M.execute(template_name, destination_file)
   end
 
   local rendered_content = template({
-    config = opts,
+    config = config.options,
   })
 
   local file = io.open(destination_file, "w")

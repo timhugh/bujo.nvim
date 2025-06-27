@@ -72,7 +72,9 @@ describe("bujo.toggle_check.install", function()
   it("sets the keybind for toggling checkboxes", function()
     local config = require("bujo.config")
     config.setup({
-      toggle_check_keybind = "<leader>tc",
+      markdown = {
+        toggle_check_keybind = "<leader>tc",
+      },
     })
     toggle.install()
     assert.stub(keymap_set_stub).was_called_with("n", "<leader>tc", toggle.toggle_check, {
