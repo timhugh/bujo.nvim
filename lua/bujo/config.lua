@@ -62,7 +62,7 @@ local defaults = {
   },
 }
 
-BujoConfig.options = vim.deepcopy(BujoConfig.options)
+BujoConfig.options = vim.deepcopy(defaults)
 
 function BujoConfig.setup(options)
   BujoConfig.options = vim.deepcopy(vim.tbl_deep_extend("keep", options or {}, defaults or {}))
