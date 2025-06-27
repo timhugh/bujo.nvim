@@ -34,6 +34,7 @@ local function get_link_path()
 
   return link_path
 end
+
 function M.follow_journal_link()
   local journal_dir = config.options.journal_dir
   local link_path = get_link_path()
@@ -56,7 +57,7 @@ function M.exec_link()
 
   if link_path then
     vim.schedule(function()
-      vim.cmd(string.format("silent! call netrw#BrowseX('%s', 'file')", vim.fn.fnameescape(link_path)))
+      vim.ui.open(link_path)
     end)
     return ""
   else
