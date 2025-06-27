@@ -1,12 +1,10 @@
 local M = {}
 
 local config = require("bujo.config")
-
-M.load_error = "module.install was not called"
+M.load_error = true
 
 function M.execute(template_name, destination_file)
   if M.load_error then
-    vim.notify("Bujo: templates are disabled: " .. M.load_error, vim.log.levels.ERROR)
     return
   end
 
@@ -39,11 +37,16 @@ function M.execute(template_name, destination_file)
 end
 
 function M.install()
-  local etlua_success, etlua_err = pcall(require, "etlua")
-  if not etlua_success then
-    M.load_error = "etlua not found: " .. etlua_err
-  else
-    M.load_error = nil
+  local etlua_success, _ = pcall(require, "etlua")
+  if etlua_success then
+    M.load_error = false
+  end
+
+  if not etlua_success and config.options.journal.template then
+    vim.notify(
+      "Bujo: you have configured a template, but etlua is not installed so your template cannot be used. Please make sure etlua is added to your dependencies or installed and added to your runtime path.",
+      vim.log.levels.ERROR)
+    return
   end
 end
 
