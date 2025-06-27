@@ -86,6 +86,29 @@ function M.follow_external_link()
   end
 end
 
+function M.execute_code_block()
+  local sniprun_available, sniprun = pcall(require, "sniprun.api")
+  if not sniprun_available then
+    vim.notify("Sniprun is not installed.\nPlease install it to execute code blocks.", vim.log.levels.ERROR)
+    return
+  end
+
+  local ts_available, ts = pcall(vim.treesitter.get_parser, 0, "markdown")
+  if not ts_available then
+    vim.notify("There is no treesitter parser configured for markdown.\nPlease check your treesitter configuration", vim.log.levels.ERROR)
+    return
+  end
+
+  local node = vim.treesitter.get_node()
+  if not node or node:type() ~= "code_fence_content" then
+    vim.notify("No code block found under cursor", vim.log.levels.WARN)
+    return
+  end
+
+  local start_row, _, end_row, _ = node:range()
+  sniprun.run_range(start_row + 1, end_row)
+end
+
 function M.install()
   local toggle_check_keybind = config.options.markdown.toggle_check_keybind
   if toggle_check_keybind then
@@ -115,6 +138,15 @@ function M.install()
       noremap = true,
       silent = true,
       desc = "Bujo: Execute markdown link in default system handler"
+    })
+  end
+
+  local execute_code_block_keybind = config.options.markdown.execute_code_block_keybind
+  if execute_code_block_keybind then
+    vim.keymap.set("n", execute_code_block_keybind, M.execute_code_block, {
+      noremap = true,
+      silent = true,
+      desc = "Bujo: Execute code block in markdown file"
     })
   end
 end

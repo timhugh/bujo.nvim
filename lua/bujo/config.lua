@@ -49,6 +49,9 @@ local defaults = {
     follow_external_link_keybind = "gx",
     -- keybind for toggling checkboxes in journal files. set to false to disable
     toggle_check_keybind = "<C-Space>",
+    -- keybind for executing code blocks in journal files. set to false to disable
+    --   this functionality relies on michaleb/sniprun
+    execute_code_block_keybind = "<leader>nr",
   },
 
   git = {

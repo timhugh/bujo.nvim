@@ -6,7 +6,9 @@ local make_entry = require("telescope.make_entry")
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 local conf = require("telescope.config").values
+
 local config = require("bujo.config")
+
 local function scan_dir(dir)
   local results = {}
   local scan = vim.loop.fs_scandir(dir)

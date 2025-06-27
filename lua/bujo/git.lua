@@ -67,12 +67,6 @@ function M.commit_and_push_if_journal_file()
 end
 
 function M.install()
-  vim.api.nvim_create_user_command("Bujo commit_and_push", function()
-    commit_and_push()
-  end, {
-    nargs = 0,
-    desc = "Bujo: Commit and push current journal state",
-  })
   vim.api.nvim_create_autocmd("BufWritePost", {
     pattern = "*.md",
     callback = function()

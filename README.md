@@ -17,13 +17,15 @@ Coming soon:
 ## Installation
 
 Using [lazy.nvim](https://github.com/folke/lazy.nvim):
-```
+
+```lua
   {
     "timhugh/bujo.nvim",
     lazy = true,
     dependencies = {
       "nvim-telescope/telescope.nvim",
-      "leafo/etlua",
+      "leafo/etlua", -- optional; required for using templates
+      "michaelb/sniprun", -- optional; required for executing code blocks
     },
     opts = {},
   },
@@ -53,13 +55,13 @@ Opens a Telescope picker for all of your entries and notes for easy navigation. 
 
 To insert a link to the selected file in the current buffer: `picker.insert_link_keybind = "<M-i>"`
 
-### `:Bujo follow`
+### `:Bujo follow_journal_link`
 
 Default keybind config: `markdown.follow_journal_link_keybind = "<M-CR>"`
 
 Finds a markdown link in the current line (if there are multiple, it will select the one under your cursor) and opens the linked note in a new buffer. This allows you to have relative links like `notes/my_current_project.md` or `entries/2025-06-25.md` relative to your journal root.
 
-### `:Bujo exec`
+### `:Bujo follow_external_link`
 
 Default keybind config: `markdown.follow_external_link_keybind = "gx"`
 
@@ -71,10 +73,16 @@ Default keybind config: `markdown.toggle_check_keybind = "<C-Space>"`
 
 Toggles the markdown checkbox on the current line between unchecked `[ ]` and checked `[x]`.
 
+### `:Bujo execute_code_block`
+
+Default keybind config: `markdown.execute_code_block_keybind = "<leader>nr"`
+
+Executes the code block under the cursor using [michaelb/sniprun](https://github.com/michaelb/sniprun). Bujo doesn't supply any special configuration to sniprun, it just uses treesitter to find the code and pass it along, so you'll want to refer to [sniprun's thorough documentation](https://michaelb.github.io/sniprun/) if you need to tweak anything for the languages you use.
+
 ### Git integration
 
 Disabled by default:
-```
+```lua
 git = {
   auto_commit = false,
   auto_push = false,
@@ -95,7 +103,7 @@ No configuration is necessary for bujo.nvim to work out of the box. By default, 
 If you would like to disable any of the default keybinds, simply set their value to `false`.
 
 Using [lazy.nvim](https://github.com/folke/lazy.nvim):
-```
+```lua
   {
     "timhugh/bujo.nvim",
     ......
@@ -112,7 +120,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 ```
 
 Or manually:
-```
+```lua
 require("bujo.nvim").setup({
 	base_directory = "~/my_journal",
 	journal = {
