@@ -32,8 +32,8 @@ local function run_command_in_journal_dir(command)
   return result.stdout
 end
 
-function M.process_queue()
-  local delay = tonumber(config.options.auto_commit_delay) or 1000
+local function commit_and_push(delay)
+  delay = delay or tonumber(config.options.auto_commit_delay) or 1000
   M._save_timer:stop()
   M._save_timer:start(delay, 0, vim.schedule_wrap(function()
     local should_commit = config.options.auto_commit_journal
@@ -59,16 +59,16 @@ function M.process_queue()
   end))
 end
 
-function M.commit_and_push()
+function M.commit_and_push_if_journal_file()
   local current_file = get_current_journal_file(vim.api.nvim_get_current_buf())
   if current_file then
-    M.process_queue()
+    commit_and_push()
   end
 end
 
 function M.install()
   vim.api.nvim_create_user_command("Bujo commit_and_push", function()
-    M.commit_and_push()
+    commit_and_push()
   end, {
     nargs = 0,
     desc = "Bujo: Commit and push current journal state",
@@ -76,7 +76,12 @@ function M.install()
   vim.api.nvim_create_autocmd("BufWritePost", {
     pattern = "*.md",
     callback = function()
-      M.commit_and_push()
+      M.commit_and_push_if_journal_file()
+    end,
+  })
+  vim.api.nvim_create_autocmd("VimLeavePre", {
+    callback = function()
+      commit_and_push(0)
     end,
   })
 end
