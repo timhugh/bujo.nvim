@@ -11,10 +11,8 @@ function M.toggle_check()
     return
   end
 
-  local new_state
-  if state == " " then
-    new_state = "x"
-  elseif state == "x" then
+  local new_state = "x"
+  if state == "x" then
     new_state = " "
   end
 
