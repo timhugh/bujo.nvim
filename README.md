@@ -71,6 +71,18 @@ Default keybind config: `toggle_check_keybind = "<C-Space>"`
 
 Toggles the markdown checkbox on the current line between unchecked `[ ]` and checked `[x]`.
 
+### Git integration
+
+Disabled by default:
+```
+  auto_commit_journal = false,
+  auto_push_journal = false,
+```
+
+When `auto_commit_journal` is enabled, saving any file inside your journal directory will automatically create a git commit with just that file with a timestamp as the message. There is a 500ms debounce to prevent multiple commits for rapid writes, e.g. when using `:wa`.
+
+When `auto_push_journal` is enabled, `git push` will automatically run after the commit is created.
+
 ## Configuration
 
 No configuration is necessary for bujo.nvim to work out of the box. By default, it will create weekly spreads in the `~/.journal` directory. You can see the default settings in [config.lua](/lua/bujo/config.lua), and override any of them in your setup:

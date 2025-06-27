@@ -5,6 +5,7 @@ local bujo_notes = require("bujo.notes")
 local bujo_find = require("bujo.find")
 local bujo_follow = require("bujo.follow")
 local bujo_toggle_check = require("bujo.toggle_check")
+local bujo_git = require("bujo.git")
 
 local commands = {
   ["now"] = bujo_notes.now,
@@ -22,6 +23,7 @@ function M.setup(user_config)
   bujo_find.install()
   bujo_follow.install()
   bujo_toggle_check.install()
+  bujo_git.install()
 end
 
 local function register_commands()

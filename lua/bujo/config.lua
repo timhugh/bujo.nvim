@@ -18,6 +18,12 @@ local defaults = {
   entries_template = false,
   -- subdirectory in journal_dir where notes will be stored
   notes_dir = "notes",
+
+  -- if you keep your journal_dir git-versioned, you can use these options to automatically
+  -- commit and push changes when buffers inside the journal_dir are saved
+  auto_commit_journal = false,
+  auto_push_journal = false,
+
   -- #### KEYBINDS ####
   -- all keybinds can be set to false to disable them
   --
