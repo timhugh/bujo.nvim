@@ -140,7 +140,7 @@ describe("markdown.install", function()
   end)
 
   describe("default keybinds", function()
-    it("sets keybinds for toggling checkboxes", function()
+    it("sets keybind for toggling checkboxes", function()
       markdown.install()
       assert.stub(keymap_set_stub).was_called_with("n", "<C-Space>", markdown.toggle_check, {
         noremap = true,
@@ -149,7 +149,7 @@ describe("markdown.install", function()
       })
     end)
 
-    it("sets keybinds for following journal links", function()
+    it("sets keybind for following journal links", function()
       markdown.install()
 
       assert.stub(keymap_set_stub).was_called_with("n", "<M-CR>", markdown.follow_journal_link, {
@@ -160,7 +160,7 @@ describe("markdown.install", function()
       })
     end)
 
-    it("sets keybinds for following external links", function()
+    it("sets keybind for following external links", function()
       markdown.install()
 
       assert.stub(keymap_set_stub).was_called_with("n", "gx", markdown.follow_external_link, {
@@ -169,6 +169,65 @@ describe("markdown.install", function()
         silent = true,
         desc = "Bujo: Execute markdown link in default system handler",
       })
+    end)
+  end)
+
+  describe("overriding keybinds", function()
+    before_each(function()
+      config.options.markdown.toggle_check_keybind = "<leader>tc"
+      config.options.markdown.follow_journal_link_keybind = "<leader>fj"
+      config.options.markdown.follow_external_link_keybind = "<leader>fe"
+    end)
+
+    it("sets keybind for toggling checkboxes", function()
+      markdown.install()
+      assert.stub(keymap_set_stub).was_called_with("n", "<leader>tc", markdown.toggle_check, {
+        noremap = true,
+        silent = true,
+        desc = "Bujo: Toggle checkbox state",
+      })
+    end)
+
+    it("sets keybind for following journal links", function()
+      markdown.install()
+
+      assert.stub(keymap_set_stub).was_called_with("n", "<leader>fj", markdown.follow_journal_link, {
+        expr = true,
+        noremap = true,
+        silent = true,
+        desc = "Bujo: Follow markdown link",
+      })
+    end)
+
+    it("sets keybind for following external links", function()
+      markdown.install()
+
+      assert.stub(keymap_set_stub).was_called_with("n", "<leader>fe", markdown.follow_external_link, {
+        expr = true,
+        noremap = true,
+        silent = true,
+        desc = "Bujo: Execute markdown link in default system handler",
+      })
+    end)
+  end)
+
+  describe("disabling keybinds", function()
+    it("does not set keybind for toggling checkboxes", function()
+      config.options.markdown.toggle_check_keybind = false
+      markdown.install()
+      assert.stub(keymap_set_stub).was_not_called_with("n", _, markdown.toggle_check, _)
+    end)
+
+    it("does not set keybind for following journal links", function()
+      config.options.markdown.follow_journal_link_keybind = false
+      markdown.install()
+      assert.stub(keymap_set_stub).was_not_called_with("n", _, markdown.follow_journal_link, _)
+    end)
+
+    it("does not set keybind for following external links", function()
+      config.options.markdown.follow_external_link_keybind = false
+      markdown.install()
+      assert.stub(keymap_set_stub).was_not_called_with("n", _, markdown.follow_external_link, _)
     end)
   end)
 end)
