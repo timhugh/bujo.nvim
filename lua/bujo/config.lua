@@ -19,6 +19,14 @@ local defaults = {
     template = false,
     -- keybind for creating or opening a journal entry for the current date span. set to false to disable
     now_keybind = "<leader>nn",
+    -- keybinds for creating or opening a journal entry for the next/previous date span. set to false to disable
+    --   - "next" and "previous" are sort of ambiguous since the date span is defined by the filename_template above
+    --     but essentially we will iterate forward or backward through time until the template evaluates to something
+    --     that isn't the current date span.
+    --   - these keybinds will open the previous or next entry to the current date, or the the next or previous entry
+    --     to the current buffer, if the current buffer is a journal entry.
+    next_keybind = "<leader>nf",
+    previous_keybind = "<leader>nb",
     -- keybind for creating a new note (will prompt for a name). set to false to disable
     note_keybind = "<leader>nN",
   },
@@ -30,7 +38,7 @@ local defaults = {
 
   picker = {
     -- keybind for opening the file picker. set to false to disable
-    open_keybind = "<leader>nf",
+    open_keybind = "<leader>fn",
     -- keybind for inserting markdown links from file picker. set to false to disable
     insert_link_keybind = "<M-i>",
   },

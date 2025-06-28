@@ -1,22 +1,9 @@
 local M = {}
 
 local config = require("bujo.config")
+local fs = require("bujo.fs_util")
 
 M._save_timer = vim.uv.new_timer()
-
-local function is_journal_file(file_path)
-  return file_path:match("%.md$") and file_path:find(config.options.base_directory, 1, true) ~= nil
-end
-
-local function get_current_journal_file(bufnr)
-  local current_file_path = vim.api.nvim_buf_get_name(bufnr)
-
-  if is_journal_file(current_file_path) then
-    return current_file_path
-  else
-    return nil
-  end
-end
 
 local function get_commit_message()
   return os.date("%Y-%m-%d %H:%M:%S")
@@ -60,7 +47,7 @@ local function commit_and_push(delay)
 end
 
 function M.commit_and_push_if_journal_file()
-  local current_file = get_current_journal_file(vim.api.nvim_get_current_buf())
+  local current_file = fs.get_current_journal_file(vim.api.nvim_get_current_buf())
   if current_file then
     commit_and_push()
   end
