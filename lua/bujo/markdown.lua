@@ -110,45 +110,27 @@ function M.execute_code_block()
 end
 
 function M.install()
-  local toggle_check_keybind = config.options.markdown.toggle_check_keybind
-  if toggle_check_keybind then
-    vim.keymap.set("n", toggle_check_keybind, M.toggle_check, {
-      noremap = true,
-      silent = true,
-      desc = "Bujo: Toggle checkbox state",
-    })
-  end
-
-  local follow_journal_link_keybind = config.options.markdown.follow_journal_link_keybind
-  if follow_journal_link_keybind then
-    vim.keymap.set("n", follow_journal_link_keybind, M.follow_journal_link, {
-      -- expr = true allows follow to return the keybind if a link isn't found and execute the next handler
-      expr = true,
-      noremap = true,
-      silent = true,
-      desc = "Bujo: Follow markdown link"
-    })
-  end
-
-  local follow_external_link_keybind = config.options.markdown.follow_external_link_keybind
-  if follow_external_link_keybind then
-    vim.keymap.set("n", follow_external_link_keybind, M.follow_external_link, {
-      -- expr = true allows exec to return the keybind if a link isn't found and execute the next handler
-      expr = true,
-      noremap = true,
-      silent = true,
-      desc = "Bujo: Execute markdown link in default system handler"
-    })
-  end
-
-  local execute_code_block_keybind = config.options.markdown.execute_code_block_keybind
-  if execute_code_block_keybind then
-    vim.keymap.set("n", execute_code_block_keybind, M.execute_code_block, {
-      noremap = true,
-      silent = true,
-      desc = "Bujo: Execute code block in markdown file"
-    })
-  end
+  local keybind = require("bujo.util.keybind")
+  keybind.map_if_defined("n",
+    config.options.markdown.toggle_check_keybind,
+    M.toggle_check,
+    { desc = "Bujo: Toggle checkbox state" }
+  )
+  keybind.map_if_defined("n",
+    config.options.markdown.follow_journal_link_keybind,
+    M.follow_journal_link,
+    { expr = true, desc = "Bujo: Follow journal link" }
+  )
+  keybind.map_if_defined("n",
+    config.options.markdown.follow_external_link_keybind,
+    M.follow_external_link,
+    { expr = true, desc = "Bujo: Follow external link in default system handler" }
+  )
+  keybind.map_if_defined("n",
+    config.options.markdown.execute_code_block_keybind,
+    M.execute_code_block,
+    { desc = "Bujo: Execute code block" }
+  )
 end
 
 return M

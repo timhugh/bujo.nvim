@@ -41,6 +41,21 @@ Default keybind config: `journal.now_keybind = "<leader>nn"`
 
 Open the spread for your current time period. By default, this will be one file per week, stored in `~/.journal/entries/<year>/<month>-<week_number>.md`. See the [Configuration](#Configuration) section if you would like to change the cadence.
 
+If `journal.template` is defined and [leafo/etlua](https://github.com/leafo/etlua) is present, the configured template will automatically be executed when a new entry is created.
+### `:Bujo next / :Bujo previous`
+
+> [!WARNING] this functionality requires LuaJIT
+
+Default keybind config:
+```lua
+next_keybind = "<leader>nf",
+previous_keybind = "<leader>nb",
+```
+
+Open the spread for the next or previous time period. If a journal spread is currently open, this will navigate forward or backward through time. If a journal spread is not open, this will open the next or previous spread relative to the current date (e.g. next week or last week for weekly spreads).
+
+If `journal.template` is defined and [leafo/etlua](https://github.com/leafo/etlua) is present, the configured template will automatically be executed when a new entry is created.
+
 ### `:Bujo note`
 
 Default keybind config: `journal.note_keybind = "<leader>nN"`
@@ -48,6 +63,8 @@ Default keybind config: `journal.note_keybind = "<leader>nN"`
 Will prompt for a name and create a new file in `~/.journal/notes`.
 
 ### `:Bujo find / :Telescope bujo`
+
+> [!WARNING] This functionality requires [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
 
 Default keybind config: `picker.open_keybind = "<leader>nf"`
 
@@ -78,6 +95,23 @@ Toggles the markdown checkbox on the current line between unchecked `[ ]` and ch
 Default keybind config: `markdown.execute_code_block_keybind = "<leader>nr"`
 
 Executes the code block under the cursor using [michaelb/sniprun](https://github.com/michaelb/sniprun). Bujo doesn't supply any special configuration to sniprun, it just uses treesitter to find the code and pass it along, so you'll want to refer to [sniprun's thorough documentation](https://michaelb.github.io/sniprun/) if you need to tweak anything for the languages you use.
+
+### Templates
+
+> [!WARNING] This functionality requires [leafo/etlua](https://github.com/leafo/etlua)
+
+#### Journal entries / spreads
+
+`.etlua` files can be placed in the templates_dir (`<base_directory>/.templates` by default). For journal entries, use the configuration `journal.template` to specify the filename of a template, and that template will be applied any time a new journal entry is created (using `:Bujo now`, `:Bujo next`, etc).
+
+See the [etlua README](https://github.com/leafo/etlua/blob/master/README.md) for information about how to format templates. The evaluation context for templates includes access to the plugin configuration as `bujo_config`, as well as anything you normally have access to in Lua.
+
+#### Arbitrary documents / `:Bujo template <template>`
+
+> [!ERROR] This isn't implemented yet
+
+`:Bujo template` does the same thing as `:Bujo note` but allows you to specify a template to execute on the created document.
+For example `:Bujo template meeting_notes` will prompt for a new note name and create the file normally, but also execute `<template_dir>meeting_notes.etlua` on the newly created file.
 
 ### Git integration
 

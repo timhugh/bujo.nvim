@@ -224,7 +224,7 @@ describe("markdown.install", function()
         expr = true,
         noremap = true,
         silent = true,
-        desc = "Bujo: Follow markdown link",
+        desc = "Bujo: Follow journal link",
       })
     end)
 
@@ -235,19 +235,14 @@ describe("markdown.install", function()
         expr = true,
         noremap = true,
         silent = true,
-        desc = "Bujo: Execute markdown link in default system handler",
+        desc = "Bujo: Follow external link in default system handler",
       })
     end)
   end)
 
   describe("overriding keybinds", function()
-    before_each(function()
-      config.options.markdown.toggle_check_keybind = "<leader>tc"
-      config.options.markdown.follow_journal_link_keybind = "<leader>fj"
-      config.options.markdown.follow_external_link_keybind = "<leader>fe"
-    end)
-
     it("sets keybind for toggling checkboxes", function()
+      config.options.markdown.toggle_check_keybind = "<leader>tc"
       markdown.install()
       assert.stub(keymap_set_stub).was_called_with("n", "<leader>tc", markdown.toggle_check, {
         noremap = true,
@@ -257,24 +252,26 @@ describe("markdown.install", function()
     end)
 
     it("sets keybind for following journal links", function()
+      config.options.markdown.follow_journal_link_keybind = "<leader>fj"
       markdown.install()
 
       assert.stub(keymap_set_stub).was_called_with("n", "<leader>fj", markdown.follow_journal_link, {
         expr = true,
         noremap = true,
         silent = true,
-        desc = "Bujo: Follow markdown link",
+        desc = "Bujo: Follow journal link",
       })
     end)
 
     it("sets keybind for following external links", function()
+      config.options.markdown.follow_external_link_keybind = "<leader>fe"
       markdown.install()
 
       assert.stub(keymap_set_stub).was_called_with("n", "<leader>fe", markdown.follow_external_link, {
         expr = true,
         noremap = true,
         silent = true,
-        desc = "Bujo: Execute markdown link in default system handler",
+        desc = "Bujo: Follow external link in default system handler",
       })
     end)
   end)

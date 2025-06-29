@@ -9,6 +9,8 @@ local bujo_templates = require("bujo.templates")
 
 local commands = {
   ["now"] = bujo_notes.now,
+  ["next"] = bujo_notes.next,
+  ["previous"] = bujo_notes.previous,
   ["note"] = bujo_notes.note,
   ["find"] = bujo_find.find,
   ["follow_journal_link"] = bujo_markdown.follow_journal_link,

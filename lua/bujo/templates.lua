@@ -23,7 +23,7 @@ function M.execute(template_name, destination_file)
   end
 
   local rendered_content = template({
-    config = config.options,
+    bujo_config = config.options,
   })
 
   local file = io.open(destination_file, "w")

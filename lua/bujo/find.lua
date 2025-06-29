@@ -79,15 +79,11 @@ function M.find(opts)
 end
 
 function M.install()
-  local keybind = config.options.picker.open_keybind
-  if keybind then
-    vim.keymap.set("n", keybind, function()
-      return M.find()
-    end, {
-      noremap = true,
-      silent = true,
-      desc = "Bujo: Find Journal Entries",
-    })
-  end
+  require("bujo.util.keybind").map_if_defined(
+    "n",
+    config.options.picker.open_keybind,
+    M.find,
+    { desc = "Bujo: Find journal entries" }
+  )
 end
 return M

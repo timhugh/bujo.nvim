@@ -1,8 +1,40 @@
 local M = {}
 
-local fs = require("bujo.fs_util")
+local fs = require("bujo.util.fs")
 local config = require("bujo.config")
 local templates = require("bujo.templates")
+
+local parse_date_from_template
+
+if jit and pcall(require, "ffi") then
+  local ffi = require("ffi")
+  ffi.cdef[[
+    typedef long time_t;
+    struct tm {
+      int tm_sec;   /* seconds after the minute - [0,60] */
+      int tm_min;   /* minutes after the hour - [0,59] */
+      int tm_hour;  /* hours since midnight - [0,23] */
+      int tm_mday;  /* day of the month - [1,31] */
+      int tm_mon;   /* months since January - [0,11] */
+      int tm_year;  /* years since 1900 */
+      int tm_wday;  /* days since Sunday - [0,6] */
+      int tm_yday;  /* days since January 1 - [0,365] */
+      int tm_isdst; /* Daylight Saving Time flag */
+    };
+    char *strptime(const char *s, const char *format, struct tm *tm);
+    time_t mktime(struct tm *tm);
+  ]]
+  parse_date_from_template = function(template, date_string)
+    local tm = ffi.new("struct tm")
+    local ret = ffi.C.strptime(date_string, template, tm)
+    if ret == nil then return nil end
+    return tonumber(ffi.C.mktime(tm))
+  end
+else
+  parse_date_from_template = function(template, date_string)
+    vim.notify("Date parsing is not supported in this environment. Please use LuaJIT with FFI enabled.", vim.log.levels.ERROR)
+  end
+end
 
 local function open_or_create_file(file_path)
   if vim.fn.filereadable(file_path) == 0 then
@@ -122,45 +154,19 @@ function M.previous()
 end
 
 function M.install()
-  local now_keybind = config.options.journal.now_keybind
-  if now_keybind then
-    vim.keymap.set("n", now_keybind, function()
-      M.now()
-    end, {
-      noremap = true,
-      silent = true,
-      desc = "Bujo: Create or open current journal entry",
-    })
-  end
-
-  local next_keybind = config.options.journal.next_keybind
-  if next_keybind then
-    vim.keymap.set("n", next_keybind, function()
-      M.next()
-    end, {
-      noremap = true,
-      silent = true,
-      desc = "Bujo: Open next journal entry",
-    })
-  end
-
-  local previous_keybind = config.options.journal.previous_keybind
-  if previous_keybind then
-    vim.keymap.set("n", previous_keybind, function()
-      M.previous()
-    end, {
-      noremap = true,
-      silent = true,
-      desc = "Bujo: Open previous journal entry",
-    })
-  end
-
-  local note_keybind = config.options.journal.note_keybind
-  if note_keybind then
-    vim.keymap.set("n", note_keybind, function()
-      M.note()
-    end, { desc = "Bujo: Create a new note" })
-  end
+  local keybind = require("bujo.util.keybind")
+  keybind.map_if_defined("n", config.options.journal.now_keybind, M.now, {
+    desc = "Bujo: Create or open current journal entry",
+  })
+  keybind.map_if_defined("n", config.options.journal.next_keybind, M.next, {
+    desc = "Bujo: Open next journal entry",
+  })
+  keybind.map_if_defined("n", config.options.journal.previous_keybind, M.previous, {
+    desc = "Bujo: Open previous journal entry",
+  })
+  keybind.map_if_defined("n", config.options.journal.note_keybind, M.note, {
+    desc = "Bujo: Create a new note",
+  })
 end
 
 return M

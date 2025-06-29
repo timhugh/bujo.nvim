@@ -1,7 +1,7 @@
 local M = {}
 
 local config = require("bujo.config")
-local fs = require("bujo.fs_util")
+local fs = require("bujo.util.fs")
 
 M._save_timer = vim.uv.new_timer()
 
