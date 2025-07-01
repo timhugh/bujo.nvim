@@ -11,15 +11,15 @@ if jit and pcall(require, "ffi") then
   ffi.cdef[[
     typedef long time_t;
     struct tm {
-      int tm_sec;   /* seconds after the minute - [0,60] */
-      int tm_min;   /* minutes after the hour - [0,59] */
-      int tm_hour;  /* hours since midnight - [0,23] */
-      int tm_mday;  /* day of the month - [1,31] */
-      int tm_mon;   /* months since January - [0,11] */
-      int tm_year;  /* years since 1900 */
-      int tm_wday;  /* days since Sunday - [0,6] */
-      int tm_yday;  /* days since January 1 - [0,365] */
-      int tm_isdst; /* Daylight Saving Time flag */
+      int tm_sec;   // seconds
+      int tm_min;   // minutes
+      int tm_hour;  // hours
+      int tm_mday;  // day of the month
+      int tm_mon;   // month
+      int tm_year;  // year
+      int tm_wday;  // day of the week (0 = Sunday)
+      int tm_yday;  // day of the year
+      int tm_isdst; // daylight savings time flag
     };
     char *strptime(const char *s, const char *format, struct tm *tm);
     time_t mktime(struct tm *tm);
@@ -31,12 +31,14 @@ if jit and pcall(require, "ffi") then
     return tonumber(ffi.C.mktime(tm))
   end
 else
-  parse_date_from_template = function(template, date_string)
+  parse_date_from_template = function(_, _)
     vim.notify("Date parsing is not supported in this environment. Please use LuaJIT with FFI enabled.", vim.log.levels.ERROR)
   end
 end
 
-local function open_or_create_file(file_path)
+local function open_or_create_journal_entry(file_path)
+  file_path = vim.fn.expand(file_path)
+
   if vim.fn.filereadable(file_path) == 0 then
     local file = io.open(file_path, "w")
     if file then
@@ -60,7 +62,7 @@ function M.note()
   vim.ui.input({ prompt = "New note name: " }, function(input)
     if input and input ~= "" then
       local filename = input:gsub("[^%w-]", "_") .. ".md"
-      local file_path = vim.fn.join({ notes_dir, filename }, "/")
+      local file_path = vim.fn.expand(vim.fn.join({ notes_dir, filename }, "/"))
       vim.cmd("edit " .. vim.fn.fnameescape(file_path))
     end
   end)
@@ -76,7 +78,7 @@ function M.now()
   local current_file_dir = vim.fn.fnamemodify(current_file_path, ":h")
   fs.ensure_directory(current_file_dir)
 
-  open_or_create_file(current_file_path)
+  open_or_create_journal_entry(current_file_path)
 end
 
 local function is_journal_file(file_path)
@@ -122,7 +124,7 @@ function M.next()
   local next_file = start_file
   local ts = start_time
   while next_file == start_file do
-    if retries >= 90 then
+    if retries >= 356 then
       vim.notify("Failed to find next journal entry after 20 attempts", vim.log.levels.WARN)
       return
     end
@@ -132,7 +134,7 @@ function M.next()
   end
 
   local next_file_path = vim.fn.join({ journal_dir, next_file }, "/") .. ".md"
-  open_or_create_file(next_file_path)
+  open_or_create_journal_entry(next_file_path)
 end
 
 function M.previous()
@@ -149,7 +151,7 @@ function M.previous()
   local next_file = current_file
   local ts = os.time()
   while next_file == current_file do
-    if retries >= 90 then
+    if retries >= 356 then
       vim.notify("Failed to find next journal entry after 20 attempts", vim.log.levels.WARN)
       return
     end
@@ -159,7 +161,7 @@ function M.previous()
   end
 
   local next_file_path = vim.fn.join({ journal_dir, next_file }, "/") .. ".md"
-  open_or_create_file(next_file_path)
+  open_or_create_journal_entry(next_file_path)
 end
 
 function M.install()
