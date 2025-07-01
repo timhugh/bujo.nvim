@@ -55,13 +55,13 @@ local function get_link_path()
 end
 
 function M.follow_journal_link()
-  local bujo_dir = config.options.base_directory
+  local bujo_dir = vim.fn.expand(config.options.base_directory)
   local link_path = get_link_path()
 
   if link_path then
     local full_path = vim.fn.join({ bujo_dir, link_path }, "/")
     vim.schedule(function()
-      vim.cmd({"edit", vim.fn.fnameescape(full_path)})
+      vim.cmd("edit " .. vim.fn.fnameescape(full_path))
     end)
     return ""
   else

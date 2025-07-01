@@ -86,7 +86,7 @@ describe("markdown.follow_journal_link", function()
     assert(markdown.follow_journal_link() == "")
     vim.wait(0) -- force async execution
 
-    assert.stub(vim_cmd_stub).was_called_with({ "edit", "~/bujo/journal/2023-10-01.md" })
+    assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/bujo/journal/2023-10-01.md"))
   end)
 
   it("follows a single link anywhere on the line regardless of cursor position and does not fall through", function()
@@ -96,7 +96,7 @@ describe("markdown.follow_journal_link", function()
     assert(markdown.follow_journal_link() == "")
     vim.wait(0) -- force async execution
 
-    assert.stub(vim_cmd_stub).was_called_with({ "edit", "~/bujo/journal/2023-10-01.md" })
+    assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/bujo/journal/2023-10-01.md"))
   end)
 
   it("follows a link under the cursor if there are multiple links on the line and does not fall through", function()
@@ -106,7 +106,7 @@ describe("markdown.follow_journal_link", function()
     assert(markdown.follow_journal_link() == "")
     vim.wait(0) -- force async execution
 
-    assert.stub(vim_cmd_stub).was_called_with({ "edit", "~/bujo/journal/2023-10-01.md" })
+    assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/bujo/journal/2023-10-01.md"))
   end)
 
   it("passes on to the next handler if there are no links", function()
