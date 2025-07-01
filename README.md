@@ -8,11 +8,7 @@ Featuring:
 - access and edit your notes from any neovim instance
 - define templates for new notes using [leafo/etlua](https://github.com/leafo/etlua)
 - provides a [telescope](https://github.com/nvim-telescope/telescope.nvim) extension to easily find notes and insert links
-
-Coming soon:
-
 - executable codeblocks using [michaelb/sniprun](https://github.com/michaelb/sniprun)
-	- the default visual selection behavior of sniprun works, but automatically code-fencing blocks and displaying multiline output does not
 
 ## Installation
 
@@ -26,7 +22,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
       "nvim-telescope/telescope.nvim",
       "leafo/etlua", -- optional; required for using templates
       "michaelb/sniprun", -- optional; required for executing code blocks
-      "Tieske/date", -- optional; required for next/previous journal spread navigation
+      "Tieske/date", -- optional; required for navigating forward/backward through journal entries
     },
     opts = {},
   },
@@ -40,7 +36,7 @@ bujo.nvim provides user commands and default keybinds for all of its functions. 
 
 Default keybind config: `journal.now_keybind = "<leader>nn"`
 
-Open the spread for your current time period. By default, this will be one file per week, stored in `~/.bujo/entries/<year>/<month>-<week_number>.md`. See the [Configuration](#Configuration) section if you would like to change the cadence.
+Open the spread for your current time period. By default, this will be one file per week, stored in `~/.bujo/entries/<year>/W<week_number>.md`. See the [Configuration](#Configuration) section if you would like to change the cadence.
 
 If `journal.template` is defined and [leafo/etlua](https://github.com/leafo/etlua) is present, the configured template will automatically be executed when a new entry is created.
 ### `:Bujo next / :Bujo previous`

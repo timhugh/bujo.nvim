@@ -3,11 +3,12 @@ local M = {}
 local fs = require("bujo.util.fs")
 local config = require("bujo.config")
 local templates = require("bujo.templates")
-local date = require("date")
+-- local date = require("date")
 
 local parse_date_from_template = function(template, date_string)
-  local date = date(template, date_string)
-  return date:spanseconds(date(1970, 1, 1))
+  -- local date = date(template, date_string)
+  -- return date:spanseconds(date(1970, 1, 1))
+  return nil
 end
 
 local function open_or_create_journal_entry(file_path)
@@ -45,6 +46,8 @@ end
 function M.now()
   local journal_dir = vim.fn.join({ config.options.base_directory, config.options.journal.subdirectory }, "/")
   fs.ensure_directory(journal_dir)
+
+  local current_date_filename = os.date(config.options.journal.filename_template)
 
   local current_file = os.date(config.options.journal.filename_template)
   local current_file_path = vim.fn.join({ journal_dir, current_file }, "/") .. ".md"

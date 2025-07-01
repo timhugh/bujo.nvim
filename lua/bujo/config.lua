@@ -47,10 +47,10 @@ local defaults = {
     -- subdirectory inside base_directory where journal entries will be stored
     subdirectory = "entries",
     -- a lua date template for journal entry files. subdirectories are supported e.g.:
-    --   "%Y/%m-%V" will create a file for each week like ~/.journal/entries/2025/06-26.md
+    --   "%Y/W%V" will create a file for each week like ~/.journal/entries/2025/W26.md
     --   "%Y/%m/%d" will create a file for each day like ~/.journal/entries/2025/06/25.md
     --   "%Y-%m-%d" will create a file for each day like ~/.journal/entries/2025-06-25.md
-    filename_template = "%Y/%m-%V",
+    filename_template = "%Y/W%V",
     -- specify an etlua template file in the templates directory to execute when creating a new entry
     --   if set to false, no template will be used and an empty file will be created
     template = false,
