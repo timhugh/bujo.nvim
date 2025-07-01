@@ -109,7 +109,7 @@ function M.execute_code_block()
   sniprun.run_range(start_row + 1, end_row)
 end
 
-function M.install()
+local function map_keybinds()
   local keybind = require("bujo.util.keybind")
   keybind.map_if_defined("n",
     config.options.markdown.toggle_check_keybind,
@@ -131,6 +131,13 @@ function M.install()
     M.execute_code_block,
     { desc = "Bujo: Execute code block" }
   )
+end
+
+function M.install()
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = "markdown",
+    callback = map_keybinds,
+  })
 end
 
 return M
