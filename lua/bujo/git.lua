@@ -47,7 +47,7 @@ local function commit_and_push(delay)
 end
 
 function M.commit_and_push_if_journal_file()
-  local current_file = fs.get_current_journal_file(vim.api.nvim_get_current_buf())
+  local current_file = fs.get_current_bujo_file(vim.api.nvim_get_current_buf())
   if current_file then
     commit_and_push()
   end

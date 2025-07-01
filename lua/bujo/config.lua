@@ -1,8 +1,45 @@
-BujoConfig = {}
+BujoConfigSingleton = {}
 
+---@class JournalConfig
+---@field subdirectory string
+---@field filename_template string
+---@field template? string|false
+---@field now_keybind? string|false
+---@field next_keybind? string|false
+---@field previous_keybind? string|false
+---@field note_keybind? string|false
+
+---@class NotesConfig
+---@field subdirectory string
+
+---@class PickerConfig
+---@field open_keybind? string|false
+---@field insert_link_keybind? string|false
+
+---@class MarkdownConfig
+---@field follow_journal_link_keybind? string|false
+---@field follow_external_link_keybind? string|false
+---@field toggle_check_keybind? string|false
+---@field execute_code_block_keybind? string|false
+
+---@class GitConfig
+---@field auto_commit boolean
+---@field auto_push boolean
+---@field debounce_ms number
+
+---@class BujoConfig
+---@field base_directory string
+---@field templates_dir? string
+---@field journal JournalConfig
+---@field notes NotesConfig
+---@field picker PickerConfig
+---@field markdown MarkdownConfig
+---@field git GitConfig
+
+---@type BujoConfig
 local defaults = {
   -- the root directory where you want to keep your markdown files
-  base_directory = vim.fn.expand("~/.journal"),
+  base_directory = vim.fn.expand("~/.bujo"),
   -- subdirectory inside base_directory where etlua templates can be found
   templates_dir = ".templates",
 
@@ -73,11 +110,14 @@ local defaults = {
   },
 }
 
-BujoConfig.options = vim.deepcopy(defaults)
+---@type BujoConfig
+BujoConfigSingleton.options = vim.deepcopy(defaults)
 
-function BujoConfig.setup(options)
-  BujoConfig.options = vim.deepcopy(vim.tbl_deep_extend("keep", options or {}, defaults or {}))
-  return BujoConfig.options
+---@param options BujoConfig|nil
+---@return BujoConfig
+function BujoConfigSingleton.setup(options)
+  BujoConfigSingleton.options = vim.deepcopy(vim.tbl_deep_extend("keep", options or {}, defaults or {}))
+  return BujoConfigSingleton.options
 end
 
-return BujoConfig
+return BujoConfigSingleton

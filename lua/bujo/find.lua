@@ -39,19 +39,19 @@ end
 function M.find(opts)
   opts = opts or {}
   opts.entry_maker = opts.entry_maker or make_entry.gen_from_file(opts)
-  local journal_root = config.options.base_directory
-  local files = scan_dir(journal_root)
+  local bujo_root = config.options.base_directory
+  local files = scan_dir(bujo_root)
   if #files == 0 then
-    vim.notify("No Markdown files found in journal directory: " .. journal_root, vim.log.levels.WARN)
+    vim.notify("No Markdown files found in journal directory: " .. bujo_root, vim.log.levels.WARN)
     return
   end
 
   pickers.new(opts, {
     prompt_title = opts.prompt_title or "Bujo: Find Journal Entries",
-    cwd = journal_root,
+    cwd = bujo_root,
     finder = finders.new_table({
       results = files,
-      entry_maker = make_entry.gen_from_file({ cwd = journal_root }),
+      entry_maker = make_entry.gen_from_file({ cwd = bujo_root }),
     }),
     sorter = conf.file_sorter(opts),
     previewer = conf.file_previewer(opts),
@@ -59,7 +59,7 @@ function M.find(opts)
       local function insert_markdown_link(selection)
         if not selection then return end
         actions.close(prompt_bufnr)
-        local relative_path = selection.filename:gsub("^" .. vim.pesc(journal_root) .. "/?", "")
+        local relative_path = selection.filename:gsub("^" .. vim.pesc(bujo_root) .. "/?", "")
         local filename = vim.fn.fnamemodify(selection.filename, ":t")
         local link_text = string.format("[%s](%s)", filename, relative_path)
         vim.api.nvim_put({ link_text }, "c", false, true)

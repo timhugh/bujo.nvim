@@ -55,7 +55,8 @@ end
 
 function M.note()
   local notes_dir = vim.fn.join({ config.options.base_directory, config.options.notes.subdirectory }, "/")
-  fs.ensure(notes_dir)
+  fs.ensure_directory(notes_dir)
+
   vim.ui.input({ prompt = "New note name: " }, function(input)
     if input and input ~= "" then
       local filename = input:gsub("[^%w-]", "_") .. ".md"
@@ -67,23 +68,29 @@ end
 
 function M.now()
   local journal_dir = vim.fn.join({ config.options.base_directory, config.options.journal.subdirectory }, "/")
-  fs.ensure(journal_dir)
+  fs.ensure_directory(journal_dir)
 
   local current_file = os.date(config.options.journal.filename_template)
   local current_file_path = vim.fn.join({ journal_dir, current_file }, "/") .. ".md"
 
   local current_file_dir = vim.fn.fnamemodify(current_file_path, ":h")
-  fs.ensure(current_file_dir)
+  fs.ensure_directory(current_file_dir)
 
   open_or_create_file(current_file_path)
+end
+
+local function is_journal_file(file_path)
+  local journal_dir = vim.fn.join({ config.options.base_directory, config.options.journal.subdirectory }, "/")
+  return file_path:match("%.md$") and fs.file_is_in_directory(file_path, journal_dir)
 end
 
 local function get_file_from_current_buffer_or_current_date()
   local journal_dir = vim.fn.join({ config.options.base_directory, config.options.journal.subdirectory }, "/")
 
   local current_file = nil
+  local current_time = nil
   local currently_open_file = vim.api.nvim_buf_get_name(0)
-  if fs.is_journal_file(currently_open_file) then
+  if is_journal_file(currently_open_file) then
     -- if currently open file is a journal file, start iterating from there
     -- get full file path and remove the extension and journal_dir from it, but keep subdirectories inside journal_dir
     -- e.g. journal_dir/subdir/file.md -> subdir/file
@@ -92,27 +99,29 @@ local function get_file_from_current_buffer_or_current_date()
       relative_path = relative_path:sub(2) -- remove leading slash if present
     end
     current_file = relative_path:gsub("%.md$", "") -- remove the .md extension
+    current_time = parse_date_from_template(config.options.journal.filename_template, current_file)
   else
     -- otherwise, use the current date as the starting point
-    current_file = os.date(config.options.journal.filename_template)
+    current_time = os.time()
+    current_file = os.date(config.options.journal.filename_template, current_time)
   end
-  return current_file
+  return current_time, current_file
 end
 
 function M.next()
   local journal_dir = vim.fn.join({ config.options.base_directory, config.options.journal.subdirectory }, "/")
-  fs.ensure(journal_dir)
+  fs.ensure_directory(journal_dir)
 
-  local current_file = get_file_from_current_buffer_or_current_date()
+  local start_time, start_file = get_file_from_current_buffer_or_current_date()
 
   -- TODO: this loop just iterates day by day until it finds a different file name
   --   it should be fine as a basic implementation, but for a large span like a year
   --   it might be better to inspect the template and try to do something more intelligent
   -- in the meantime we'll add a retry limit to avoid infinite loops
   local retries = 0
-  local next_file = current_file
-  local ts = os.time()
-  while next_file == current_file do
+  local next_file = start_file
+  local ts = start_time
+  while next_file == start_file do
     if retries >= 90 then
       vim.notify("Failed to find next journal entry after 20 attempts", vim.log.levels.WARN)
       return
@@ -128,7 +137,7 @@ end
 
 function M.previous()
   local journal_dir = vim.fn.join({ config.options.base_directory, config.options.journal.subdirectory }, "/")
-  fs.ensure(journal_dir)
+  fs.ensure_directory(journal_dir)
 
   local current_file = get_file_from_current_buffer_or_current_date()
 

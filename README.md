@@ -39,7 +39,7 @@ bujo.nvim provides user commands and default keybinds for all of its functions. 
 
 Default keybind config: `journal.now_keybind = "<leader>nn"`
 
-Open the spread for your current time period. By default, this will be one file per week, stored in `~/.journal/entries/<year>/<month>-<week_number>.md`. See the [Configuration](#Configuration) section if you would like to change the cadence.
+Open the spread for your current time period. By default, this will be one file per week, stored in `~/.bujo/entries/<year>/<month>-<week_number>.md`. See the [Configuration](#Configuration) section if you would like to change the cadence.
 
 If `journal.template` is defined and [leafo/etlua](https://github.com/leafo/etlua) is present, the configured template will automatically be executed when a new entry is created.
 ### `:Bujo next / :Bujo previous`
@@ -60,7 +60,7 @@ If `journal.template` is defined and [leafo/etlua](https://github.com/leafo/etlu
 
 Default keybind config: `journal.note_keybind = "<leader>nN"`
 
-Will prompt for a name and create a new file in `~/.journal/notes`.
+Will prompt for a name and create a new file in `<base_directory>/notes`.
 
 ### `:Bujo find / :Telescope bujo`
 
@@ -132,7 +132,7 @@ When `git.auto_push` is enabled, `git push` will automatically run after the com
 
 ## Configuration
 
-No configuration is necessary for bujo.nvim to work out of the box. By default, it will create weekly spreads in the `~/.journal` directory. You can see the default settings in [config.lua](/lua/bujo/config.lua), and override any of them in your setup.
+No configuration is necessary for bujo.nvim to work out of the box. By default, it will create weekly spreads in the `~/.bujo` directory. You can see the default settings in [config.lua](/lua/bujo/config.lua), and override any of them in your setup.
 
 If you would like to disable any of the default keybinds, simply set their value to `false`.
 

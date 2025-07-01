@@ -1,3 +1,5 @@
+-- require("tests.spec_helper").setup()
+
 local config = require("bujo.config")
 local markdown = require("bujo.markdown")
 local stub = require("luassert.stub")
