@@ -86,7 +86,7 @@ local defaults = {
     --   if there is only one link on the line, it will be followed
     --   if there are multiple links, the link under the cursor will be followed
     -- set to false to disable
-    follow_journal_link_keybind = "<M-CR>",
+    follow_journal_link_keybind = "gf",
     -- keybind for opening a link with the default system handler. This is identical to the default "gx"
     -- behavior of vim, but it also will open a link in the current line if there is only one link on the
     -- line, or the link under the cursor if there are multiple links.

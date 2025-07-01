@@ -71,7 +71,7 @@ To insert a link to the selected file in the current buffer: `picker.insert_link
 
 ### `:Bujo follow_journal_link`
 
-Default keybind config: `markdown.follow_journal_link_keybind = "<M-CR>"`
+Default keybind config: `markdown.follow_journal_link_keybind = "gf"`
 
 Finds a markdown link in the current line (if there are multiple, it will select the one under your cursor) and opens the linked note in a new buffer. This allows you to have relative links like `notes/my_current_project.md` or `entries/2025-06-25.md` relative to your journal root.
 
