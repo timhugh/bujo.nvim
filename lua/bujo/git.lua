@@ -10,7 +10,8 @@ local function get_commit_message()
 end
 
 local function run_command_in_base_dir(command)
-  local process = vim.system(command, { cwd = config.options.base_directory })
+  local bujo_dir = vim.fn.expand(config.options.base_directory)
+  local process = vim.system(command, { cwd = bujo_dir })
   local result = process:wait()
   if result.code ~= 0 then
     vim.notify("Bujo: command failed: " .. table.concat(process.cmd, " ") .. " - " .. result.stderr, vim.log.levels.ERROR)

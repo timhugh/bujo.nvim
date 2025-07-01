@@ -31,7 +31,7 @@ function M.os_time_stub(t)
   if t then
     return M.os_time_unstubbed(t)
   else
-    return M.stubbed_time
+    return M.os_time_unstubbed(M.stubbed_time)
   end
 end
 

@@ -26,6 +26,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
       "nvim-telescope/telescope.nvim",
       "leafo/etlua", -- optional; required for using templates
       "michaelb/sniprun", -- optional; required for executing code blocks
+      "Tieske/date", -- optional; required for next/previous journal spread navigation
     },
     opts = {},
   },
@@ -44,7 +45,7 @@ Open the spread for your current time period. By default, this will be one file 
 If `journal.template` is defined and [leafo/etlua](https://github.com/leafo/etlua) is present, the configured template will automatically be executed when a new entry is created.
 ### `:Bujo next / :Bujo previous`
 
-> [!WARNING] this functionality requires LuaJIT
+> [!WARNING] this functionality requires [Tieske/date](https://github.com/Tieske/date)
 
 Default keybind config:
 ```lua

@@ -3,37 +3,11 @@ local M = {}
 local fs = require("bujo.util.fs")
 local config = require("bujo.config")
 local templates = require("bujo.templates")
+local date = require("date")
 
-local parse_date_from_template
-
-if jit and pcall(require, "ffi") then
-  local ffi = require("ffi")
-  ffi.cdef[[
-    typedef long time_t;
-    struct tm {
-      int tm_sec;   // seconds
-      int tm_min;   // minutes
-      int tm_hour;  // hours
-      int tm_mday;  // day of the month
-      int tm_mon;   // month
-      int tm_year;  // year
-      int tm_wday;  // day of the week (0 = Sunday)
-      int tm_yday;  // day of the year
-      int tm_isdst; // daylight savings time flag
-    };
-    char *strptime(const char *s, const char *format, struct tm *tm);
-    time_t mktime(struct tm *tm);
-  ]]
-  parse_date_from_template = function(template, date_string)
-    local tm = ffi.new("struct tm")
-    local ret = ffi.C.strptime(date_string, template, tm)
-    if ret == nil then return nil end
-    return tonumber(ffi.C.mktime(tm))
-  end
-else
-  parse_date_from_template = function(_, _)
-    vim.notify("Date parsing is not supported in this environment. Please use LuaJIT with FFI enabled.", vim.log.levels.ERROR)
-  end
+local parse_date_from_template = function(template, date_string)
+  local date = date(template, date_string)
+  return date:spanseconds(date(1970, 1, 1))
 end
 
 local function open_or_create_journal_entry(file_path)
@@ -87,7 +61,7 @@ local function is_journal_file(file_path)
 end
 
 local function get_file_from_current_buffer_or_current_date()
-  local journal_dir = vim.fn.join({ config.options.base_directory, config.options.journal.subdirectory }, "/")
+  local journal_dir = vim.fn.expand(vim.fn.join({ config.options.base_directory, config.options.journal.subdirectory }, "/"))
 
   local current_file = nil
   local current_time = nil
@@ -96,7 +70,8 @@ local function get_file_from_current_buffer_or_current_date()
     -- if currently open file is a journal file, start iterating from there
     -- get full file path and remove the extension and journal_dir from it, but keep subdirectories inside journal_dir
     -- e.g. journal_dir/subdir/file.md -> subdir/file
-    local relative_path = currently_open_file:sub(#journal_dir +1)
+    local absolute_path = vim.fn.expand(currently_open_file)
+    local relative_path = absolute_path:sub(#journal_dir +1)
     if relative_path:sub(1, 1) == "/" then
       relative_path = relative_path:sub(2) -- remove leading slash if present
     end
@@ -124,8 +99,8 @@ function M.next()
   local next_file = start_file
   local ts = start_time
   while next_file == start_file do
-    if retries >= 356 then
-      vim.notify("Failed to find next journal entry after 20 attempts", vim.log.levels.WARN)
+    if retries >= 30 then
+      vim.notify("Failed to find next journal entry after 30 attempts", vim.log.levels.WARN)
       return
     end
     ts = ts + 24 * 60 * 60 -- add one day
@@ -141,18 +116,18 @@ function M.previous()
   local journal_dir = vim.fn.join({ config.options.base_directory, config.options.journal.subdirectory }, "/")
   fs.ensure_directory(journal_dir)
 
-  local current_file = get_file_from_current_buffer_or_current_date()
+  local start_time, start_file = get_file_from_current_buffer_or_current_date()
 
   -- TODO: this loop just iterates day by day until it finds a different file name
   --   it should be fine as a basic implementation, but for a large span like a year
   --   it might be better to inspect the template and try to do something more intelligent
   -- in the meantime we'll add a retry limit to avoid infinite loops
   local retries = 0
-  local next_file = current_file
-  local ts = os.time()
-  while next_file == current_file do
-    if retries >= 356 then
-      vim.notify("Failed to find next journal entry after 20 attempts", vim.log.levels.WARN)
+  local next_file = start_file
+  local ts = start_time
+  while next_file == start_file do
+    if retries >= 30 then
+      vim.notify("Failed to find next journal entry after 30 attempts", vim.log.levels.WARN)
       return
     end
     ts = ts - 24 * 60 * 60 -- subtract one day
