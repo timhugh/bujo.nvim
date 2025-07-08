@@ -4,10 +4,10 @@ A markdown bullet journal accessible from any neovim session!
 
 Featuring:
 
-- uses standard markdown files so you're not locked in
+- uses standard markdown files so you're not locked in to a specific journal app/plugin
 - access and edit your notes from any neovim instance
 - define templates for new notes using [leafo/etlua](https://github.com/leafo/etlua)
-- provides a [telescope](https://github.com/nvim-telescope/telescope.nvim) extension to easily find notes and insert links
+- provides [telescope](https://github.com/nvim-telescope/telescope.nvim) extensions to easily find notes and insert links
 - executable codeblocks using [michaelb/sniprun](https://github.com/michaelb/sniprun)
 
 ## Installation
@@ -15,17 +15,19 @@ Featuring:
 Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ```lua
-  {
-    "timhugh/bujo.nvim",
-    lazy = true,
-    dependencies = {
-      "nvim-telescope/telescope.nvim",
-      "leafo/etlua", -- optional; required for using templates
-      "michaelb/sniprun", -- optional; required for executing code blocks
-    },
-    opts = {},
+{
+  "timhugh/bujo.nvim",
+  lazy = true,
+  dependencies = {
+    "nvim-telescope/telescope.nvim", -- optional but highly recommended; required for navigating notes
+    "leafo/etlua", -- optional; required for using templates
+    "michaelb/sniprun", -- optional; required for executing code blocks
   },
+  opts = {},
+},
 ```
+
+It is _highly_ recommended that you use a version of Neovim built with LuaJIT. It's very likely that you are already are, but if you're not sure you can learn more about that in the [Neovim docs](https://neovim.io/doc/user/lua.html#lua-luajit)
 
 ## Usage
 
@@ -99,7 +101,7 @@ Toggles the markdown checkbox on the current line between unchecked `[ ]` and ch
 
 Default keybind config: `markdown.execute_code_block_keybind = "<leader>nr"`
 
-Executes the code block under the cursor using [michaelb/sniprun](https://github.com/michaelb/sniprun). Bujo doesn't supply any special configuration to sniprun, it just uses treesitter to find the code and pass it along, so you'll want to refer to [sniprun's thorough documentation](https://michaelb.github.io/sniprun/) if you need to tweak anything for the languages you use.
+Executes the code block under the cursor using [michaelb/sniprun](https://github.com/michaelb/sniprun). bujo.nvim doesn't supply any special configuration to sniprun, it just uses treesitter to find the code and pass it along, so you'll want to refer to [sniprun's thorough documentation](https://michaelb.github.io/sniprun/) if you need to tweak anything for the languages you use.
 
 ### Templates
 
@@ -142,53 +144,67 @@ No configuration is necessary for bujo.nvim to work out of the box. By default, 
 If you would like to disable any of the default keybinds, simply set their value to `false`.
 
 Using [lazy.nvim](https://github.com/folke/lazy.nvim):
+
 ```lua
-  {
-    "timhugh/bujo.nvim",
-    ......
-    opts = {
-      base_directory = "~/my_journal",
-      journal = {
-			  filename_template = "%Y-%m-%d",
-			},
-			markdown = {
-        follow_external_link_keybind = false,
-			},
+{
+  "timhugh/bujo.nvim",
+  ......
+  opts = {
+    base_directory = "~/my_journal",
+    journal = {
+      filename_template = "%Y-%m-%d",
+    },
+    markdown = {
+      follow_external_link_keybind = false,
     },
   },
+},
 ```
 
 Or manually:
+
 ```lua
-require("bujo.nvim").setup({
-	base_directory = "~/my_journal",
-	journal = {
-		filename_template = "%Y-%m-%d",
-	},
-	{
-		follow_external_link_keybind = false,
-	},
+require("bujo").setup({
+  base_directory = "~/my_journal",
+  journal = {
+    filename_template = "%Y-%m-%d",
+  },
+  markdown = {
+    follow_external_link_keybind = false,
+  },
 })
 ```
 
+## Compatibility
+
+bujo.nvim is by no means thoroughly tested with other plugins, but care has been taken to follow best practices for not breaking other stuff. Keybinds are only mapped globally when it makes sense and are otherwise confined only to markdown buffers, and those keybinds typically allow fallthrough so they won't block other plugins' behavior if they aren't relevant. If there are any conflicts, all keybinds are configurable (see [Configuration](#Configuration)).
+
+bujo.nvim does not provide any markdown rendering or formatting capability. I've used it alongside [MeanderingProgrammer/render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim) without issue, but I wouldn't expect it to interfere with any rendering/formatting plugins.
+
 ## Contributing
 
-PRs are open!
+Feel free to submit Issues or PRs! I tried to make bujo.nvim configurable and modular, but I built it with my personal use case in mind and with very little Lua and plugin development experience, so I'm happy to take suggestions and improvements.
 
-To run tests, you'll need [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) in your neovim config, e.g. using Lazy.nvim:
+Some notes on process/design ideals:
+- There isn't a versioning/release strategy yet. I'm avoiding breaking changes, but no guarantees for the time being
+- New features should be tested (see [Testing](#Testing) below)
+- Most features should be configurable, but the default configuration should always work correctly
+  - keybinds in particular should always be configurable and possible to disable if some functionality isn't desired
+
+## Testing
+
+Test coverage is not complete, but any new features should be tested (and PRs to improve the existing tests are also great). To run tests, you'll need [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) in your neovim config. Note that the plugin itself does not require plenary.nvim, it is only used for running tests. For example, if you are using [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ```lua
-  {
-    "timhugh/bujo.nvim",
-    dependencies = {
-      ...
-      "nvim-lua/plenary.nvim",
-    },
+{
+  "timhugh/bujo.nvim",
+  dependencies = {
     ...
-  }
+    "nvim-lua/plenary.nvim",
+  },
+  ...
+},
 ```
-
-Note that the plugin itself does not require plenary.nvim, it is only used for running tests.
 
 Then you can use Plenary as normal, or to run tests from the command line:
 
