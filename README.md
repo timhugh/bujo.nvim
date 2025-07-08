@@ -69,6 +69,14 @@ Opens a Telescope picker for all of your entries and notes for easy navigation. 
 
 To insert a link to the selected file in the current buffer: `picker.insert_link_keybind = "<M-i>"`
 
+### `:Bujo insert_link / :Telescope bujo_insert_link
+
+> [!WARNING] This functionality requires [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
+
+Default keybind config: `picker.insert_link_picker_keybind`
+
+Similar to `:Bujo find`, this opens a Telescope picker for all of your entries and notes, but it is only mapped in insert mode and the default action inserts a markdown link into the current buffer instead of opening the file.
+
 ### `:Bujo follow_journal_link`
 
 Default keybind config: `markdown.follow_journal_link_keybind = "gf"`

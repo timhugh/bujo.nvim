@@ -13,6 +13,7 @@ local commands = {
   ["previous"] = bujo_notes.previous,
   ["note"] = bujo_notes.note,
   ["find"] = bujo_find.find,
+  ["insert_link"] = bujo_find.insert_link,
   ["follow_journal_link"] = bujo_markdown.follow_journal_link,
   ["follow_external_link"] = bujo_markdown.follow_external_link,
   ["toggle_check"] = bujo_markdown.toggle_check,

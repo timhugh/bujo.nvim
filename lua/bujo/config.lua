@@ -15,6 +15,7 @@ BujoConfigSingleton = {}
 ---@class PickerConfig
 ---@field open_keybind? string|false
 ---@field insert_link_keybind? string|false
+---@field insert_link_picker_keybind? string|false
 
 ---@class MarkdownConfig
 ---@field follow_journal_link_keybind? string|false
@@ -78,6 +79,10 @@ local defaults = {
     open_keybind = "<leader>fn",
     -- keybind for inserting markdown links from file picker. set to false to disable
     insert_link_keybind = "<M-i>",
+    -- keybind for opening the insert link picker. set to false to disable.
+    -- this is the same picker, but the default action (usually <CR>) will insert a link
+    -- instead of opening the file
+    insert_link_picker_keybind = "<M-i>",
   },
 
   markdown = {

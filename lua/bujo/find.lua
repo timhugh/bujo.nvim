@@ -78,12 +78,52 @@ function M.find(opts)
   }):find()
 end
 
+function M.insert_link()
+  opts = opts or {}
+  opts.entry_maker = opts.entry_maker or make_entry.gen_from_file(opts)
+  local bujo_root = vim.fn.expand(config.options.base_directory)
+  local files = scan_dir(bujo_root)
+  if #files == 0 then
+    vim.notify("No Markdown files found in journal directory: " .. bujo_root, vim.log.levels.WARN)
+    return
+  end
+
+  pickers.new(opts, {
+    prompt_title = opts.prompt_title or "Bujo: Insert link to note or entry",
+    cwd = bujo_root,
+    finder = finders.new_table({
+      results = files,
+      entry_maker = make_entry.gen_from_file({ cwd = bujo_root }),
+    }),
+    sorter = conf.file_sorter(opts),
+    previewer = conf.file_previewer(opts),
+    attach_mappings = function(prompt_bufnr, map)
+      actions.select_default:replace(function()
+        local selection = action_state.get_selected_entry(prompt_bufnr)
+        local relative_path = selection.filename:gsub("^" .. vim.pesc(bujo_root) .. "/?", "")
+        local filename = vim.fn.fnamemodify(selection.filename, ":t")
+        local link_text = string.format("[%s](%s)", filename, relative_path)
+        actions.close(prompt_bufnr)
+        vim.api.nvim_put({ link_text }, "c", false, true)
+      end)
+      return true
+    end,
+  }):find()
+end
+
 function M.install()
-  require("bujo.util.keybind").map_if_defined(
+  local keybind = require("bujo.util.keybind")
+  keybind.map_if_defined(
     "n",
     config.options.picker.open_keybind,
     M.find,
     { desc = "Bujo: Find journal entries" }
+  )
+  keybind.map_if_defined(
+    "i",
+    config.options.picker.insert_link_picker_keybind,
+    M.insert_link,
+    { desc = "Bujo: Insert link to note or entry" }
   )
 end
 return M
