@@ -170,3 +170,25 @@ require("bujo.nvim").setup({
 	},
 })
 ```
+
+## Contributing
+
+PRs are open!
+
+To run tests, [LuaRocks](https://github.com/luarocks/luarocks/blob/main/docs/download.md) is required to get dependencies:
+
+```sh
+luarocks install date
+luarocks install etlua
+```
+
+You'll also need [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) in your neovim config.
+
+Running tests is as simple as:
+
+```sh
+# all tests:
+nvim --headless -c 'PlenaryBustedDirectory tests/' +qall
+# specific test:
+nvim --headless -c 'PlenaryBustedFile tests/notes_spec.lua' +qall
+```
