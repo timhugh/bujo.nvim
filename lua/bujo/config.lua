@@ -41,32 +41,49 @@ BujoConfigSingleton = {}
 local defaults = {
   -- the root directory where you want to keep your markdown files
   base_directory = vim.fn.expand("~/.bujo"),
+
   -- subdirectory inside base_directory where etlua templates can be found
   templates_dir = ".templates",
 
   journal = {
-    -- subdirectory inside base_directory where journal entries will be stored
+    -- subdirectory inside base_directory where journal entries will be stored (e.g. ~/.bujo/entries)
     subdirectory = "entries",
+
     -- a lua date template for journal entry files. subdirectories are supported e.g.:
-    --   "%Y/W%V" will create a file for each week like ~/.journal/entries/2025/W26.md
-    --   "%Y/%m/%d" will create a file for each day like ~/.journal/entries/2025/06/25.md
-    --   "%Y-%m-%d" will create a file for each day like ~/.journal/entries/2025-06-25.md
+    --   "%Y/W%V" will create a file for each week like ~/.bujo/entries/2025/W26.md
+    --   "%Y/%m/%d" will create a file for each day like ~/.bujo/entries/2025/06/25.md
+    --   "%Y-%m-%d" will create a file for each day like ~/.bujo/entries/2025-06-25.md
+    -- Note that your template also determines the date span, and Bujo is fully agnostic to date spans but will instead
+    -- identify whether or not a span applies to a given date based on whether or not the template evaluates to the same
+    -- string. This means that some care must be taken when defining your template with incompatible date specifiers, e.g
+    -- using the %m month and %V week specifiers in the same template will not work as expected when a week starts and ends
+    -- in two different months.
+    -- Also note that Bujo uses days as the smallest unit of time, so templates should not use any time specifiers like %H or %M,
+    -- otherwise forward and backward navigation will not work as expected.
     filename_template = "%Y/W%V",
-    -- specify an etlua template file in the templates directory to execute when creating a new entry
-    --   if set to false, no template will be used and an empty file will be created
-    template = false,
-    -- keybind for creating or opening a journal entry for the current date span. set to false to disable
+
+    -- keybind for navigating to the journal entry span for the current date. If it doesn't already exist, a file will be created,
+    -- and if a template is configured, that template will automatically be executed on the new file. set to false to disable
     now_keybind = "<leader>nn",
-    -- keybinds for creating or opening a journal entry for the next/previous date span. set to false to disable
-    --   - "next" and "previous" are sort of ambiguous since the date span is defined by the filename_template above
-    --     but essentially we will iterate forward or backward through time until the template evaluates to something
-    --     that isn't the current date span.
-    --   - these keybinds will open the previous or next entry to the current date, or the the next or previous entry
-    --     to the current buffer, if the current buffer is a journal entry.
+
+    -- keybinds for creating or opening a journal entry for the next/previous date span. set to false to disable.
+    -- If the current buffer is a journal entry, the next/previous entry relative to that file will be opened. If the current buffer 
+    -- is not a journal entry, then the next/previous entry will be selected based on the current date.
+    -- Note that the next and previous date spans are determined using the filename_template, e.g. if the filename_template's smallest 
+    -- unit is one week (%V), then the file for the next or previous week will be opened. Changing the filename_template with pre-existing
+    -- entries will lead to unexpected behavior, so it is recommended to set the filename_template before creating any entries and to aggregate
+    -- and rename existing entries if you change the template later and still want to be able to navigate between them chronologically.
     next_keybind = "<leader>nf",
     previous_keybind = "<leader>nb",
+
     -- keybind for creating a new note (will prompt for a name). set to false to disable
     note_keybind = "<leader>nN",
+
+    -- specify an etlua template file in the templates directory to execute when creating a new entry. For example, if you
+    -- use the default values for base_directory and templates_dir, then to use a template located at ~/.bujo/.templates/daily-template.etlua
+    -- you would set this to "daily-template.etlua". If set to false, no template will be used and new files will be empty.
+    template = false,
+
   },
 
   notes = {
@@ -77,8 +94,10 @@ local defaults = {
   picker = {
     -- keybind for opening the file picker. set to false to disable
     open_keybind = "<leader>fn",
+
     -- keybind for inserting markdown links from file picker. set to false to disable
     insert_link_keybind = "<M-i>",
+
     -- keybind for opening the insert link picker. set to false to disable.
     -- this is the same picker, but the default action (usually <CR>) will insert a link
     -- instead of opening the file
@@ -87,18 +106,21 @@ local defaults = {
 
   markdown = {
     -- keybind for following journal markdown links. this speficially allows you to use relative links
-    -- like `notes/my_note.md` to refer to a note at `~/.journal/notes/my_note.md` and still follow it
+    -- like `notes/my_note.md` to refer to a note at `~/.bujo/notes/my_note.md` and still follow it
     --   if there is only one link on the line, it will be followed
     --   if there are multiple links, the link under the cursor will be followed
     -- set to false to disable
     follow_journal_link_keybind = "gf",
+
     -- keybind for opening a link with the default system handler. This is identical to the default "gx"
     -- behavior of vim, but it also will open a link in the current line if there is only one link on the
     -- line, or the link under the cursor if there are multiple links.
     -- set to false to disable
     follow_external_link_keybind = "gx",
+
     -- keybind for toggling checkboxes in journal files. set to false to disable
     toggle_check_keybind = "<C-Space>",
+
     -- keybind for executing code blocks in journal files. set to false to disable
     --   this functionality relies on michaleb/sniprun
     execute_code_block_keybind = "<leader>nr",
@@ -109,8 +131,9 @@ local defaults = {
     -- commit and push changes when buffers inside the base_directory are saved
     auto_commit = false,
     auto_push = false,
-    -- the debounce in milliseconds after a buffer save to queue writes before committing
-    --   this is mostly to avoid committing multiple times in a row when writing multiple files like ":wa"
+
+    -- the debounce in milliseconds after a buffer save to queue writes before committing this is 
+    -- mostly to avoid committing multiple times in a row when writing multiple files like ":wa"
     debounce_ms = 1000,
   },
 }
