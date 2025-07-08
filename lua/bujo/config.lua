@@ -7,10 +7,12 @@ BujoConfigSingleton = {}
 ---@field now_keybind? string|false
 ---@field next_keybind? string|false
 ---@field previous_keybind? string|false
----@field note_keybind? string|false
+---@field iteration_step_seconds number
+---@field iteration_max_steps number
 
 ---@class NotesConfig
 ---@field subdirectory string
+---@field note_keybind? string|false
 
 ---@class PickerConfig
 ---@field open_keybind? string|false
@@ -62,6 +64,11 @@ local defaults = {
     -- otherwise forward and backward navigation will not work as expected.
     filename_template = "%Y/W%V",
 
+    -- specify an etlua template file in the templates directory to execute when creating a new entry. For example, if you
+    -- use the default values for base_directory and templates_dir, then to use a template located at ~/.bujo/.templates/daily-template.etlua
+    -- you would set this to "daily-template.etlua". If set to false, no template will be used and new files will be empty.
+    template = false,
+
     -- keybind for navigating to the journal entry span for the current date. If it doesn't already exist, a file will be created,
     -- and if a template is configured, that template will automatically be executed on the new file. set to false to disable
     now_keybind = "<leader>nn",
@@ -76,19 +83,23 @@ local defaults = {
     next_keybind = "<leader>nf",
     previous_keybind = "<leader>nb",
 
-    -- keybind for creating a new note (will prompt for a name). set to false to disable
-    note_keybind = "<leader>nN",
-
-    -- specify an etlua template file in the templates directory to execute when creating a new entry. For example, if you
-    -- use the default values for base_directory and templates_dir, then to use a template located at ~/.bujo/.templates/daily-template.etlua
-    -- you would set this to "daily-template.etlua". If set to false, no template will be used and new files will be empty.
-    template = false,
-
+    -- configuration for how Bujo will iterate through date spans when navigating to the next or previous entry.
+    -- The defaults will support anything from daily to quarterly entries, but these can be adjusted for more bespoke use cases.
+    -- Bujo takes a fairly naive approach to finding previous/next entries, which is to iterate through timestamps and continually 
+    -- evaluate the filename_template. When it finds a date that evaluates to a different filename than the current one, it will stop 
+    -- iterating and open that file. If you are using something like a quarterly or yearly template, you may want to increase the
+    -- iteration_step_seconds so less iterations are required, or adjust the iteration_limit to allow for more iterations if e.g.
+    -- 120 days is not a large enough search span for your filename template.
+    iteration_step_seconds = 24 * 60 * 60,
+    iteration_max_steps = 120,
   },
 
   notes = {
     -- subdirectory inside base_directory where notes will be stored
     subdirectory = "notes",
+
+    -- keybind for creating a new note (will prompt for a name). set to false to disable
+    note_keybind = "<leader>nN",
   },
 
   picker = {

@@ -8,9 +8,7 @@ function M.execute(template_name, destination_file)
     return
   end
 
-  destination_file = vim.fn.expand(destination_file)
-
-  local template_path = vim.fn.join({ config.options.base_directory, config.options.templates_dir, template_name }, "/")
+  local template_path = vim.fn.expand(vim.fn.join({ config.options.base_directory, config.options.templates_dir, template_name }, "/"))
   local template_content = vim.fn.readfile(template_path)
 
   if not template_content or #template_content == 0 then
@@ -28,7 +26,7 @@ function M.execute(template_name, destination_file)
     bujo_config = config.options,
   })
 
-  local file = io.open(destination_file, "w")
+  local file = io.open(vim.fn.expand(destination_file), "w")
   if not file then
     vim.notify("Failed to open destination file: " .. destination_file, vim.log.levels.ERROR)
     return

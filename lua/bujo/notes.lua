@@ -3,12 +3,14 @@ local M = {}
 local fs = require("bujo.util.fs")
 local config = require("bujo.config")
 local templates = require("bujo.templates")
--- local date = require("date")
+local date = require("bujo.util.date")
 
-local parse_date_from_template = function(template, date_string)
-  -- local date = date(template, date_string)
-  -- return date:spanseconds(date(1970, 1, 1))
-  return nil
+local parse_date_from_template = function(date_string, template)
+  local parsed_date = date.parse(date_string, template)
+  if not parsed_date then
+    return nil
+  end
+  return os.time(parsed_date)
 end
 
 local function open_or_create_journal_entry(file_path)
@@ -47,8 +49,6 @@ function M.now()
   local journal_dir = vim.fn.join({ config.options.base_directory, config.options.journal.subdirectory }, "/")
   fs.ensure_directory(journal_dir)
 
-  local current_date_filename = os.date(config.options.journal.filename_template)
-
   local current_file = os.date(config.options.journal.filename_template)
   local current_file_path = vim.fn.join({ journal_dir, current_file }, "/") .. ".md"
 
@@ -79,7 +79,7 @@ local function get_file_from_current_buffer_or_current_date()
       relative_path = relative_path:sub(2) -- remove leading slash if present
     end
     current_file = relative_path:gsub("%.md$", "") -- remove the .md extension
-    current_time = parse_date_from_template(config.options.journal.filename_template, current_file)
+    current_time = parse_date_from_template(current_file, config.options.journal.filename_template)
   else
     -- otherwise, use the current date as the starting point
     current_time = os.time()
@@ -93,20 +93,20 @@ function M.next()
   fs.ensure_directory(journal_dir)
 
   local start_time, start_file = get_file_from_current_buffer_or_current_date()
+  if not start_time or not start_file then
+    vim.notify("Failed to determine starting journal entry", vim.log.levels.ERROR)
+    return
+  end
 
-  -- TODO: this loop just iterates day by day until it finds a different file name
-  --   it should be fine as a basic implementation, but for a large span like a year
-  --   it might be better to inspect the template and try to do something more intelligent
-  -- in the meantime we'll add a retry limit to avoid infinite loops
   local retries = 0
   local next_file = start_file
   local ts = start_time
   while next_file == start_file do
-    if retries >= 30 then
-      vim.notify("Failed to find next journal entry after 30 attempts", vim.log.levels.WARN)
+    if retries >= config.options.journal.iteration_max_steps then
+      vim.notify("Failed to find next journal entry after " .. config.options.journal.iteration_max_steps .. " attempts", vim.log.levels.WARN)
       return
     end
-    ts = ts + 24 * 60 * 60 -- add one day
+    ts = ts + config.options.journal.iteration_step_seconds
     next_file = os.date(config.options.journal.filename_template, ts)
     retries = retries + 1
   end
@@ -120,26 +120,26 @@ function M.previous()
   fs.ensure_directory(journal_dir)
 
   local start_time, start_file = get_file_from_current_buffer_or_current_date()
+  if not start_time or not start_file then
+    vim.notify("Failed to determine starting journal entry", vim.log.levels.ERROR)
+    return
+  end
 
-  -- TODO: this loop just iterates day by day until it finds a different file name
-  --   it should be fine as a basic implementation, but for a large span like a year
-  --   it might be better to inspect the template and try to do something more intelligent
-  -- in the meantime we'll add a retry limit to avoid infinite loops
   local retries = 0
-  local next_file = start_file
+  local prev_file = start_file
   local ts = start_time
-  while next_file == start_file do
-    if retries >= 30 then
-      vim.notify("Failed to find next journal entry after 30 attempts", vim.log.levels.WARN)
+  while prev_file == start_file do
+    if retries >= config.options.journal.iteration_max_steps then
+      vim.notify("Failed to find previous journal entry after " .. config.options.journal.iteration_max_steps .. " attempts", vim.log.levels.WARN)
       return
     end
-    ts = ts - 24 * 60 * 60 -- subtract one day
-    next_file = os.date(config.options.journal.filename_template, ts)
+    ts = ts - config.options.journal.iteration_step_seconds
+    prev_file = os.date(config.options.journal.filename_template, ts)
     retries = retries + 1
   end
 
-  local next_file_path = vim.fn.join({ journal_dir, next_file }, "/") .. ".md"
-  open_or_create_journal_entry(next_file_path)
+  local prev_file_path = vim.fn.join({ journal_dir, prev_file }, "/") .. ".md"
+  open_or_create_journal_entry(prev_file_path)
 end
 
 function M.install()
@@ -153,7 +153,7 @@ function M.install()
   keybind.map_if_defined("n", config.options.journal.previous_keybind, M.previous, {
     desc = "Bujo: Open previous journal entry",
   })
-  keybind.map_if_defined("n", config.options.journal.note_keybind, M.note, {
+  keybind.map_if_defined("n", config.options.notes.note_keybind, M.note, {
     desc = "Bujo: Create a new note",
   })
 end

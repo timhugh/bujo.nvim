@@ -5,6 +5,7 @@ local time_util = require("tests.util.time")
 local stub = require("luassert.stub")
 
 describe("note", function()
+  local vim_notify_stub
   local vim_cmd_stub
   local vim_mkdir_stub
   local file_readable_stub
@@ -14,6 +15,13 @@ describe("note", function()
   local os_time_stub
 
   before_each(function()
+    vim_notify_stub = stub(vim, "notify", function(msg, level)
+      if level == vim.log.levels.ERROR then
+        error(msg)
+      else
+        print("Notify: " .. msg)
+      end
+    end)
     vim_cmd_stub = stub(vim, "cmd")
     vim_mkdir_stub = stub(vim.fn, "mkdir", function(dir, mode) return 1 end)
     file_readable_stub = stub(vim.fn, "filereadable")
@@ -35,6 +43,7 @@ describe("note", function()
   end)
 
   after_each(function()
+    vim_notify_stub:revert()
     vim_cmd_stub:revert()
     vim_mkdir_stub:revert()
     file_readable_stub:revert()
@@ -123,19 +132,19 @@ describe("note", function()
         config.options.journal.filename_template = "%Y-W%V"
       end)
 
-      -- it("navigates forward one week from the current file", function()
-      --   nvim_buf_get_name_stub.returns(vim.fn.expand("~/test_bujo/journal/2025-W23.md"))
-      --   notes.next()
-      --   vim.wait(0)
-      --   assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/journal/2025-W24.md"))
-      -- end)
-      --
-      -- it("navigates backward one week from the current file", function()
-      --   nvim_buf_get_name_stub.returns(vim.fn.expand("~/test_bujo/journal/2025-06-W23.md"))
-      --   notes.previous()
-      --   vim.wait(0)
-      --   assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/journal/2025-W22.md"))
-      -- end)
+      it("navigates forward one week from the current file", function()
+        nvim_buf_get_name_stub.returns(vim.fn.expand("~/test_bujo/journal/2025-W23.md"))
+        notes.next()
+        vim.wait(0)
+        assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/journal/2025-W24.md"))
+      end)
+
+      it("navigates backward one week from the current file", function()
+        nvim_buf_get_name_stub.returns(vim.fn.expand("~/test_bujo/journal/2025-W23.md"))
+        notes.previous()
+        vim.wait(0)
+        assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/journal/2025-W22.md"))
+      end)
 
       it("navigates forward one week from the current date", function()
         nvim_buf_get_name_stub.returns("some_other_file.md")
@@ -157,19 +166,19 @@ describe("note", function()
         config.options.journal.filename_template = "%Y-%m-%d"
       end)
 
-      -- it("navigates forward one day from the current file", function()
-      --   nvim_buf_get_name_stub.returns(vim.fn.expand("~/test_bujo/journal/06-22.md"))
-        -- notes.next()
-        -- vim.wait(0)
-      --   assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/journal/06-23.md"))
-      -- end)
-      --
-      -- it("navigates backward one day from the current file", function()
-      --   nvim_buf_get_name_stub.returns(vim.fn.expand("~/test_bujo/journal/06-26.md"))
-        -- notes.next()
-        -- vim.wait(0)
-      --   assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/journal/06-22.md"))
-      -- end)
+      it("navigates forward one day from the current file", function()
+        nvim_buf_get_name_stub.returns(vim.fn.expand("~/test_bujo/journal/2025-06-22.md"))
+        notes.next()
+        vim.wait(0)
+        assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/journal/2025-06-23.md"))
+      end)
+
+      it("navigates backward one day from the current file", function()
+        nvim_buf_get_name_stub.returns(vim.fn.expand("~/test_bujo/journal/2025-06-22.md"))
+        notes.previous()
+        vim.wait(0)
+        assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/journal/2025-06-21.md"))
+      end)
 
       it("navigates forward one day from the current date", function()
         nvim_buf_get_name_stub.returns("some_other_file.md")
@@ -191,19 +200,19 @@ describe("note", function()
         config.options.journal.filename_template = "%Y-%m"
       end)
 
-      -- it("navigates forward one month from the current file", function()
-      --   nvim_buf_get_name_stub.returns(vim.fn.expand("~/test_bujo/journal/06-22.md"))
-        -- notes.next()
-        -- vim.wait(0)
-      --   assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/journal/06-23.md"))
-      -- end)
-      --
-      -- it("navigates backward one month from the current file", function()
-      --   nvim_buf_get_name_stub.returns(vim.fn.expand("~/test_bujo/journal/06-26.md"))
-        -- notes.next()
-        -- vim.wait(0)
-      --   assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/journal/06-22.md"))
-      -- end)
+      it("navigates forward one month from the current file", function()
+        nvim_buf_get_name_stub.returns(vim.fn.expand("~/test_bujo/journal/2025-08.md"))
+        notes.next()
+        vim.wait(0)
+        assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/journal/2025-09.md"))
+      end)
+
+      it("navigates backward one month from the current file", function()
+        nvim_buf_get_name_stub.returns(vim.fn.expand("~/test_bujo/journal/2025-08.md"))
+        notes.previous()
+        vim.wait(0)
+        assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/journal/2025-07.md"))
+      end)
 
       it("navigates forward one month from the current date", function()
         nvim_buf_get_name_stub.returns("some_other_file.md")
@@ -221,44 +230,44 @@ describe("note", function()
     end)
   end)
 
-  -- describe("note", function()
-  --   local vim_ui_input_stub
-  --
-  --   local subject = function()
-  --     notes.note()
-  --     vim.wait(0)
-  --   end
-  --
-  --   before_each(function()
-  --     vim_ui_input_stub = stub(vim.ui, "input", function(opts, callback)
-  --       assert(opts.prompt == "New note name: ")
-  --       callback("test note")
-  --     end)
-  --
-  --     config.options.base_directory = "~/test_bujo"
-  --     config.options.journal.subdirectory = "notes"
-  --   end)
-  --
-  --   after_each(function()
-  --     vim_ui_input_stub:revert()
-  --   end)
-  --
-  --   it("ensures the notes directory exists", function()
-  --     subject()
-  --     assert.stub(vim_mkdir_stub).was_called_with(vim.fn.expand("~/test_bujo/notes"), "p")
-  --   end)
-  --
-  --   it("prompts for a new note name", function()
-  --     subject()
-  --     assert.stub(vim_ui_input_stub).was_called()
-  --   end)
-  --
-  --   it("opens a new note with a path-safe name", function()
-  --     subject()
-  --     assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/notes/test_note.md"))
-  --   end)
-  -- end)
-  --
+  describe("note", function()
+    local vim_ui_input_stub
+
+    local subject = function()
+      notes.note()
+      vim.wait(0)
+    end
+
+    before_each(function()
+      vim_ui_input_stub = stub(vim.ui, "input", function(opts, callback)
+        assert(opts.prompt == "New note name: ")
+        callback("test note")
+      end)
+
+      config.options.base_directory = "~/test_bujo"
+      config.options.journal.subdirectory = "notes"
+    end)
+
+    after_each(function()
+      vim_ui_input_stub:revert()
+    end)
+
+    it("ensures the notes directory exists", function()
+      subject()
+      assert.stub(vim_mkdir_stub).was_called_with(vim.fn.expand("~/test_bujo/notes"), "p")
+    end)
+
+    it("prompts for a new note name", function()
+      subject()
+      assert.stub(vim_ui_input_stub).was_called()
+    end)
+
+    it("opens a new note with a path-safe name", function()
+      subject()
+      assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/notes/test_note.md"))
+    end)
+  end)
+
   -- describe("install", function()
   --   local keymap_set_stub
   --

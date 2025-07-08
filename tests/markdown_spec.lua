@@ -1,5 +1,3 @@
--- require("tests.spec_helper").setup()
-
 local config = require("bujo.config")
 local markdown = require("bujo.markdown")
 local stub = require("luassert.stub")
@@ -160,7 +158,7 @@ describe("markdown.follow_external_link", function()
   it("opens a single link anywhere on the line regardless of cursor position and does not fall through", function()
     get_current_line_stub.returns("- hey check out this cool [link](http://example.com)")
     win_get_cursor_stub.returns({ 1, 1 }) -- cursor is not on the link
-    
+
     assert(markdown.follow_external_link() == "")
     vim.wait(0) -- force async execution
 
@@ -170,7 +168,7 @@ describe("markdown.follow_external_link", function()
   it("opens a link under the cursor if there are multiple links on the line and does not fall through", function()
     get_current_line_stub.returns("- here are some neat links: [link1](http://example1.com) and [link2](http://example2.com)")
     win_get_cursor_stub.returns({ 1, 30 }) -- cursor is on link1
-    
+
     assert(markdown.follow_external_link() == "")
     vim.wait(0) -- force async execution
 
@@ -190,7 +188,7 @@ describe("markdown.follow_external_link", function()
   it("passes on to the next handler if there are multiple links and the cursor is not on one of them", function()
     get_current_line_stub.returns("- here are some neat links: [link1](http://example1.com) and [link2](http://example2.com)")
     win_get_cursor_stub.returns({ 1, 1 })
-    
+
     assert(markdown.follow_external_link() == config.options.markdown.follow_external_link_keybind)
     vim.wait(0) -- force async execution
 

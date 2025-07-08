@@ -22,7 +22,6 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
       "nvim-telescope/telescope.nvim",
       "leafo/etlua", -- optional; required for using templates
       "michaelb/sniprun", -- optional; required for executing code blocks
-      "Tieske/date", -- optional; required for navigating forward/backward through journal entries
     },
     opts = {},
   },
@@ -39,9 +38,10 @@ Default keybind config: `journal.now_keybind = "<leader>nn"`
 Open the spread for your current time period. By default, this will be one file per week, stored in `~/.bujo/entries/<year>/W<week_number>.md`. See the [Configuration](#Configuration) section if you would like to change the cadence.
 
 If `journal.template` is defined and [leafo/etlua](https://github.com/leafo/etlua) is present, the configured template will automatically be executed when a new entry is created.
+
 ### `:Bujo next / :Bujo previous`
 
-> [!WARNING] this functionality requires [Tieske/date](https://github.com/Tieske/date)
+> [!WARNING] this functionality requires LuaJIT
 
 Default keybind config:
 ```lua
@@ -55,7 +55,7 @@ If `journal.template` is defined and [leafo/etlua](https://github.com/leafo/etlu
 
 ### `:Bujo note`
 
-Default keybind config: `journal.note_keybind = "<leader>nN"`
+Default keybind config: `notes.note_keybind = "<leader>nN"`
 
 Will prompt for a name and create a new file in `<base_directory>/notes`.
 
@@ -175,16 +175,22 @@ require("bujo.nvim").setup({
 
 PRs are open!
 
-To run tests, [LuaRocks](https://github.com/luarocks/luarocks/blob/main/docs/download.md) is required to get dependencies:
+To run tests, you'll need [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) in your neovim config, e.g. using Lazy.nvim:
 
-```sh
-luarocks install date
-luarocks install etlua
+```lua
+  {
+    "timhugh/bujo.nvim",
+    dependencies = {
+      ...
+      "nvim-lua/plenary.nvim",
+    },
+    ...
+  }
 ```
 
-You'll also need [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) in your neovim config.
+Note that the plugin itself does not require plenary.nvim, it is only used for running tests.
 
-Running tests is as simple as:
+Then you can use Plenary as normal, or to run tests from the command line:
 
 ```sh
 # all tests:
