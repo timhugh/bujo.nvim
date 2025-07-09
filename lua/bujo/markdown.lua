@@ -54,12 +54,12 @@ local function get_link_path()
   return link_path
 end
 
-function M.follow_journal_link()
-  local bujo_dir = vim.fn.expand(config.options.base_directory)
+function M.follow_bujo_link()
+  local bujo_root = vim.fn.expand(config.options.base_directory)
   local link_path = get_link_path()
 
   if link_path then
-    local full_path = vim.fn.join({ bujo_dir, link_path }, "/")
+    local full_path = vim.fn.join({ bujo_root, link_path }, "/")
     vim.schedule(function()
       vim.cmd("edit " .. vim.fn.fnameescape(full_path))
     end)
@@ -67,7 +67,7 @@ function M.follow_journal_link()
   else
     -- fall through to the next handler for the keybind
     --   this allows overriding standard keybinds like `gf` or `<CR>` without affecting their normal behavior
-    return config.options.markdown.follow_journal_link_keybind
+    return config.options.markdown.follow_bujo_link_keybind
   end
 end
 
@@ -117,9 +117,9 @@ local function map_keybinds()
     { desc = "Bujo: Toggle checkbox state" }
   )
   keybind.map_if_defined("n",
-    config.options.markdown.follow_journal_link_keybind,
-    M.follow_journal_link,
-    { expr = true, desc = "Bujo: Follow journal link" }
+    config.options.markdown.follow_bujo_link_keybind,
+    M.follow_bujo_link,
+    { expr = true, desc = "Bujo: Follow bujo link" }
   )
   keybind.map_if_defined("n",
     config.options.markdown.follow_external_link_keybind,

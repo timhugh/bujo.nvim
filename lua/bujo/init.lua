@@ -14,7 +14,7 @@ local commands = {
   ["note"] = bujo_notes.note,
   ["find"] = bujo_find.find,
   ["insert_link"] = bujo_find.insert_link,
-  ["follow_journal_link"] = bujo_markdown.follow_journal_link,
+  ["follow_bujo_link"] = bujo_markdown.follow_bujo_link,
   ["follow_external_link"] = bujo_markdown.follow_external_link,
   ["toggle_check"] = bujo_markdown.toggle_check,
   ["execute_code_block"] = bujo_markdown.execute_code_block,
@@ -34,7 +34,7 @@ local function register_commands()
   vim.api.nvim_create_user_command("Bujo", function(opts)
     local arg = opts.args or "now"
     if not commands[arg] then
-      vim.notify("Unknown :Bujo command: " .. arg, vim.log.levels.ERROR)
+      vim.notify("Bujo: Unknown command: " .. arg, vim.log.levels.ERROR)
       return
     end
     commands[arg]()

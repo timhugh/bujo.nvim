@@ -42,12 +42,12 @@ function M.find(opts)
   local bujo_root = vim.fn.expand(config.options.base_directory)
   local files = scan_dir(bujo_root)
   if #files == 0 then
-    vim.notify("No Markdown files found in journal directory: " .. bujo_root, vim.log.levels.WARN)
+    vim.notify("Bujo: No files found in " .. bujo_root, vim.log.levels.WARN)
     return
   end
 
   pickers.new(opts, {
-    prompt_title = opts.prompt_title or "Bujo: Find Journal Entries",
+    prompt_title = opts.prompt_title or "Bujo: Find document",
     cwd = bujo_root,
     finder = finders.new_table({
       results = files,
@@ -55,26 +55,6 @@ function M.find(opts)
     }),
     sorter = conf.file_sorter(opts),
     previewer = conf.file_previewer(opts),
-    attach_mappings = function(prompt_bufnr, map)
-      local function insert_markdown_link(selection)
-        if not selection then return end
-        actions.close(prompt_bufnr)
-        local relative_path = selection.filename:gsub("^" .. vim.pesc(bujo_root) .. "/?", "")
-        local filename = vim.fn.fnamemodify(selection.filename, ":t")
-        local link_text = string.format("[%s](%s)", filename, relative_path)
-        vim.api.nvim_put({ link_text }, "c", false, true)
-      end
-      map("n", config.options.picker.insert_link_keybind, function()
-        local selection = action_state.get_selected_entry()
-        insert_markdown_link(selection)
-      end)
-      map("i", config.options.picker.insert_link_keybind, function()
-        local selection = action_state.get_selected_entry()
-        insert_markdown_link(selection)
-      end)
-
-      return true
-    end,
   }):find()
 end
 
@@ -84,12 +64,12 @@ function M.insert_link()
   local bujo_root = vim.fn.expand(config.options.base_directory)
   local files = scan_dir(bujo_root)
   if #files == 0 then
-    vim.notify("No Markdown files found in journal directory: " .. bujo_root, vim.log.levels.WARN)
+    vim.notify("Bujo: No files found in " .. bujo_root, vim.log.levels.WARN)
     return
   end
 
   pickers.new(opts, {
-    prompt_title = opts.prompt_title or "Bujo: Insert link to note or entry",
+    prompt_title = opts.prompt_title or "Bujo: Insert link to document",
     cwd = bujo_root,
     finder = finders.new_table({
       results = files,
@@ -113,17 +93,25 @@ end
 
 function M.install()
   local keybind = require("bujo.util.keybind")
+
   keybind.map_if_defined(
     "n",
     config.options.picker.open_keybind,
     M.find,
-    { desc = "Bujo: Find journal entries" }
+    { desc = "Bujo: Find document" }
   )
-  keybind.map_if_defined(
-    "i",
-    config.options.picker.insert_link_picker_keybind,
-    M.insert_link,
-    { desc = "Bujo: Insert link to note or entry" }
-  )
+
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = "markdown",
+    callback = function()
+      keybind.map_if_defined(
+        "i",
+        config.options.picker.insert_link_keybind,
+        M.insert_link,
+        { desc = "Bujo: Insert link to document" }
+      )
+    end,
+  })
 end
+
 return M

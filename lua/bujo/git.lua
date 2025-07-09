@@ -10,14 +10,23 @@ local function get_commit_message()
 end
 
 local function run_command_in_base_dir(command)
-  local bujo_dir = vim.fn.expand(config.options.base_directory)
-  local process = vim.system(command, { cwd = bujo_dir })
+  local bujo_root = vim.fn.expand(config.options.base_directory)
+  local process = vim.system(command, { cwd = bujo_root })
   local result = process:wait()
   if result.code ~= 0 then
     vim.notify("Bujo: command failed: " .. table.concat(process.cmd, " ") .. " - " .. result.stderr, vim.log.levels.ERROR)
     return false
   end
   return result.stdout
+end
+
+local function notify(message, level)
+  if not config.options.git.notify then
+    return
+  end
+
+  level = level or vim.log.levels.INFO
+  vim.notify("Bujo: " .. message, level)
 end
 
 local function commit_and_push(delay)
@@ -36,18 +45,18 @@ local function commit_and_push(delay)
       return
     end
 
-    vim.notify("Bujo: committing changes to journal", vim.log.levels.INFO)
+    notify("Committing changes", vim.log.levels.INFO)
     if not run_command_in_base_dir({ "git", "add", "." }) then return end
     if not run_command_in_base_dir({ "git", "commit", "-m", get_commit_message() }) then return end
 
     if should_push then
-      vim.notify("Bujo: pushing changes to remote", vim.log.levels.INFO)
+      notify("Pushing changes to remote", vim.log.levels.INFO)
       if not run_command_in_base_dir({"git", "push"}) then return end
     end
   end))
 end
 
-function M.commit_and_push_if_journal_file()
+function M.commit_and_push_if_bujo_file()
   local current_file = fs.get_current_bujo_file(vim.api.nvim_get_current_buf())
   if current_file then
     commit_and_push()
@@ -58,7 +67,7 @@ function M.install()
   vim.api.nvim_create_autocmd("BufWritePost", {
     pattern = "*.md",
     callback = function()
-      M.commit_and_push_if_journal_file()
+      M.commit_and_push_if_bujo_file()
     end,
   })
   vim.api.nvim_create_autocmd("VimLeavePre", {

@@ -19,19 +19,24 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
   "timhugh/bujo.nvim",
   lazy = true,
   dependencies = {
-    "nvim-telescope/telescope.nvim", -- optional but highly recommended; required for navigating notes
-    "leafo/etlua", -- optional; required for using templates
-    "michaelb/sniprun", -- optional; required for executing code blocks
+    "nvim-telescope/telescope.nvim",
+    "leafo/etlua",
+    "michaelb/sniprun",
   },
   opts = {},
 },
 ```
 
-It is _highly_ recommended that you use a version of Neovim built with LuaJIT. It's very likely that you are already are, but if you're not sure you can learn more about that in the [Neovim docs](https://neovim.io/doc/user/lua.html#lua-luajit)
+## Dependencies
+
+- [telescope](https://github.com/nvim-telescope/telescope.nvim) is required for pickers. Technically you can use the other features of bujo.nvim without it, but you're missing out on a big part of what makes it useful
+- [leafo/etlua](https://github.com/leafo/etlua) is required if you want to use templates
+- [michaelb/sniprun](https://github.com/michaelb/sniprun) is required if you want to be able to execute code blocks in your markdown files
+- LuaJIT is required to use the next/previous functions. It's very likely that you are already are using LuaJIT, but if you're not sure you can learn more about that in the [Neovim docs](https://neovim.io/doc/user/lua.html#lua-luajit)
 
 ## Usage
 
-bujo.nvim distinguishes between two types of documents. A "spread" is tied to a specific date range (weekly by default, but see [Configuration](#Configuration) for more options), where a "note" is typically tied to specific topic ("weekly status meeting updates" or "blog ideas"), but you can use them however you would like.
+bujo.nvim distinguishes between two types of documents. A "spread" is tied to a specific date range (weekly by default, but see [Configuration](#configuration) for more options), where a "note" is typically tied to specific topic ("weekly status meeting updates" or "blog ideas"), but you can use them however you would like.
 
 Here are some of the common functions:
 
@@ -42,7 +47,7 @@ Here are some of the common functions:
 - Create a new note with `<leader>nN` or `:Bujo note`. You will be prompted for a name
 - Search for and open a specific document with `<leader>fn` or `:Bujo find`
 
-bujo.nvim also provides some conveniences for linking documents together. Note these binds/commands are only available in markdown documents:
+bujo.nvim also provides some conveniences for linking documents together. Note these keybinds are only mapped in markdown documents:
 
 - Insert a link to another document with `<M-i>` while in insert mode. This will open a picker that inserts a link when you select a document
 - Follow a document link with `gf`. If there's only a single link on the current line, your cursor doesn't even have to be inside it
@@ -52,10 +57,7 @@ Additionally, bujo.nvim integrates with [michaelb/sniprun](https://github.com/mi
 
 ### Templates
 
-> [!WARNING]
-> This functionality requires [leafo/etlua](https://github.com/leafo/etlua)
-
-`.etlua` files can be placed in the templates_dir (`<base_directory>/.templates` by default). For journal entries, use the configuration `journal.template` to specify the filename of a template, and that template will be applied any time a new journal entry is created (using `:Bujo now`, `:Bujo next`, etc).
+`.etlua` files can be placed in the templates_dir (`<base_directory>/.templates` by default). For spreads, use the configuration `spreads.template` to specify the filename of a template, and that template will be applied any time a new spread is created (using `:Bujo now`, `:Bujo next`, etc).
 
 `<leader>nt` or `:Bujo template` does the same thing as `:Bujo note` but allows you to specify a template to execute on the created document. For example `:Bujo template meeting_notes` will prompt for a new note name and create the file normally, but also execute `<template_dir>/meeting_notes.etlua` on the newly created file.
 
@@ -63,7 +65,7 @@ See the [etlua README](https://github.com/leafo/etlua/blob/master/README.md) for
 
 ### Git integration
 
-bujo.nvim can automatically commit and push changes for you if you would like. It's disabled by default, but when enabled it will commit and push any time a bujo document is saved (optionally after a short debounce delay, which defaults to 1 second to support `:wa`). Note that it will commit and push _all_ changes to your bujo repo, not just the current file.
+bujo.nvim can automatically commit and push changes for you if you would like. This is disabled by default, but when enabled it will commit and push any time a bujo document is saved (optionally after a short debounce delay, which defaults to 1 second to support `:wa`). Note that it will commit and push _all_ changes to your bujo repo, not just the current file.
 
 To enable, alter the `git` section of the config:
 ```lua
@@ -85,8 +87,8 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
   "timhugh/bujo.nvim",
   ......
   opts = {
-    base_directory = "~/my_journal",
-    journal = {
+    base_directory = "~/my_bujo",
+    spreads = {
       filename_template = "%Y-%m-%d",
     },
     markdown = {
@@ -100,8 +102,8 @@ Or manually:
 
 ```lua
 require("bujo").setup({
-  base_directory = "~/my_journal",
-  journal = {
+  base_directory = "~/my_bujo",
+  spreads = {
     filename_template = "%Y-%m-%d",
   },
   markdown = {
@@ -112,7 +114,7 @@ require("bujo").setup({
 
 ## Compatibility
 
-bujo.nvim is by no means thoroughly tested with other plugins, but care has been taken to follow best practices for not breaking other stuff. Keybinds are only mapped globally when it makes sense and are otherwise confined only to markdown buffers, and those keybinds typically allow fallthrough so they won't block other plugins' behavior if they aren't relevant. If there are any conflicts, all keybinds are configurable (see [Configuration](#Configuration)).
+bujo.nvim is by no means thoroughly tested with other plugins, but care has been taken to follow best practices for not breaking other stuff. Keybinds are only mapped globally when it makes sense and are otherwise confined only to markdown buffers, and those keybinds typically allow fallthrough so they won't block other plugins' behavior if they aren't relevant. If there are any conflicts, all keybinds are configurable (see [Configuration](#configuration)).
 
 bujo.nvim does not provide any markdown rendering or formatting capability. I've used it alongside [MeanderingProgrammer/render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim) without issue, but I wouldn't expect it to interfere with any rendering/formatting plugins.
 
@@ -122,7 +124,7 @@ Feel free to submit Issues or PRs! I tried to make bujo.nvim configurable and mo
 
 Some notes on process/design ideals:
 - There isn't a versioning/release strategy yet. I'm avoiding breaking changes, but no guarantees for the time being
-- New features should be tested (see [Testing](#Testing) below)
+- New features should be tested (see [Testing](#testing) below)
 - Most features should be configurable, but the default configuration should always work correctly
   - keybinds in particular should always be configurable and possible to disable if some functionality isn't desired
 
