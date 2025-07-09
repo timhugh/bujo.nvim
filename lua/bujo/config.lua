@@ -51,7 +51,7 @@ local defaults = {
     -- subdirectory inside base_directory where journal entries will be stored (e.g. ~/.bujo/entries)
     subdirectory = "entries",
 
-    -- a lua date template for journal entry files. subdirectories are supported e.g.:
+    -- A Lua/strftime date template for journal entry files. subdirectories are supported e.g.:
     --   "%Y/W%V" will create a file for each week like ~/.bujo/entries/2025/W26.md
     --   "%Y/%m/%d" will create a file for each day like ~/.bujo/entries/2025/06/25.md
     --   "%Y-%m-%d" will create a file for each day like ~/.bujo/entries/2025-06-25.md
@@ -60,11 +60,12 @@ local defaults = {
     -- string. This means that some care must be taken when defining your template with incompatible date specifiers, e.g
     -- using the %m month and %V week specifiers in the same template will not work as expected when a week starts and ends
     -- in two different months.
-    -- Also note that Bujo uses days as the smallest unit of time, so templates should not use any time specifiers like %H or %M,
-    -- otherwise forward and backward navigation will not work as expected.
+    -- Also note that bujo.nvim uses days as the smallest unit of time by default, so using time specifiers like %H or %M,
+    -- will cause next/previous to break unless you adjust the iteration_step_seconds and iteration_max_steps accordingly.
+    -- For more information on date specifiers, refer to the strftime documentation: https://www.man7.org/linux/man-pages/man3/strftime.3.html
     filename_template = "%Y/W%V",
 
-    -- specify an etlua template file in the templates directory to execute when creating a new entry. For example, if you
+    -- Specify an etlua template file in the templates directory to execute when creating a new entry. For example, if you
     -- use the default values for base_directory and templates_dir, then to use a template located at ~/.bujo/.templates/daily-template.etlua
     -- you would set this to "daily-template.etlua". If set to false, no template will be used and new files will be empty.
     template = false,
@@ -83,13 +84,18 @@ local defaults = {
     next_keybind = "<leader>nf",
     previous_keybind = "<leader>nb",
 
-    -- configuration for how Bujo will iterate through date spans when navigating to the next or previous entry.
+    -- Configuration for how bujo.nvim will iterate through date spans when navigating to the next or previous entry.
+    --
     -- The defaults will support anything from daily to quarterly entries, but these can be adjusted for more bespoke use cases.
-    -- Bujo takes a fairly naive approach to finding previous/next entries, which is to iterate through timestamps and continually 
+    -- bujo.nvim takes a fairly naive approach to finding previous/next entries, which is to iterate through timestamps and continually 
     -- evaluate the filename_template. When it finds a date that evaluates to a different filename than the current one, it will stop 
     -- iterating and open that file. If you are using something like a quarterly or yearly template, you may want to increase the
     -- iteration_step_seconds so less iterations are required, or adjust the iteration_limit to allow for more iterations if e.g.
     -- 120 days is not a large enough search span for your filename template.
+    --
+    -- As noted above, this iteration can behave oddly if the filename_template has mixed specifiers that can potentially evaluate differently
+    -- for the same date span, e.g. using both %m and %V in the same template, and can also behave oddly if the filename_template is changed
+    -- after entries have been created.
     iteration_step_seconds = 24 * 60 * 60,
     iteration_max_steps = 120,
   },
