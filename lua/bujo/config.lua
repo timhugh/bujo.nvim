@@ -42,7 +42,7 @@ BujoConfigSingleton = {}
 ---@type BujoConfig
 local defaults = {
   -- the root directory where you want to keep your markdown files
-  base_directory = vim.fn.expand("~/.bujo"),
+  base_directory = "~/.bujo",
 
   -- subdirectory inside base_directory where etlua templates can be found
   templates_dir = ".templates",
