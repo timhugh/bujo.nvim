@@ -5,7 +5,9 @@ A markdown bullet journal accessible from any neovim session!
 Featuring:
 
 - uses standard markdown files so you're not locked in to a specific journal app/plugin
+- highly configurable and unopinionated to suit your flow
 - access and edit your notes from any neovim instance
+- convenient mappings for inserting links and navigating between linked documents
 - define templates for new notes using [leafo/etlua](https://github.com/leafo/etlua)
 - provides [telescope](https://github.com/nvim-telescope/telescope.nvim) extensions to easily find notes and insert links
 - executable codeblocks using [michaelb/sniprun](https://github.com/michaelb/sniprun)
