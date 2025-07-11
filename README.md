@@ -29,14 +29,14 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ## Dependencies
 
-- [telescope](https://github.com/nvim-telescope/telescope.nvim) is required for pickers. Technically you can use the other features of bujo.nvim without it, but you're missing out on a big part of what makes it useful
+- [nvim-telescope/telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) is required for pickers. Technically you can use the other features of bujo.nvim without it, but you're missing out on a big part of what makes it useful
 - [leafo/etlua](https://github.com/leafo/etlua) is required if you want to use templates
 - [michaelb/sniprun](https://github.com/michaelb/sniprun) is required if you want to be able to execute code blocks in your markdown files
 - LuaJIT is required to use the next/previous functions. It's very likely that you are already are using LuaJIT, but if you're not sure you can learn more about that in the [Neovim docs](https://neovim.io/doc/user/lua.html#lua-luajit)
 
 ## Usage
 
-bujo.nvim distinguishes between two types of documents. A "spread" is tied to a specific date range (weekly by default, but see [Configuration](#configuration) for more options), where a "note" is typically tied to specific topic ("weekly status meeting updates" or "blog ideas"), but you can use them however you would like.
+bujo.nvim distinguishes between two types of documents. A "spread" is tied to a specific date range (weekly by default, but see [Configuration](#configuration) for more options), where a "note" is typically tied to a specific topic ("weekly status meeting updates" or "blog ideas"), but you can use them however you would like.
 
 Here are some of the common functions:
 
@@ -115,6 +115,10 @@ require("bujo").setup({
 ## Compatibility
 
 bujo.nvim is by no means thoroughly tested with other plugins, but care has been taken to follow best practices for not breaking other stuff. Keybinds are only mapped globally when it makes sense and are otherwise confined only to markdown buffers, and those keybinds typically allow fallthrough so they won't block other plugins' behavior if they aren't relevant. If there are any conflicts, all keybinds are configurable (see [Configuration](#configuration)).
+
+If you find an compatibility issue with another plugin, feel free to open an issue or PR! See [Contributing](#contributing) for more details.
+
+bujo.nvim has explicit dependencies on a few plugins that I suspect could be swapped for other popular options, but I built it with the plugins I use in mind so there are no adapters as of yet. If that interests you, see [Contributing](#contributing) for ways to make that happen! As an example, bujo.nvim explicitly depends on [nvim-telescope/telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) for pickers. I know there are other popular options like [echasnovski/mini.pick](https://github.com/echasnovski/mini.pick) and [https://github.com/folke/snacks.nvim](https://github.com/folke/snacks.nvim), I just don't use them so they aren't supported yet.
 
 bujo.nvim does not provide any markdown rendering or formatting capability. I've used it alongside [MeanderingProgrammer/render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim) without issue, but I wouldn't expect it to interfere with any rendering/formatting plugins.
 
