@@ -4,7 +4,7 @@ local templates = require("bujo.templates")
 local time_util = require("tests.util.time")
 local stub = require("luassert.stub")
 
-describe("note", function()
+describe("notes", function()
   local vim_notify_stub
   local vim_cmd_stub
   local vim_mkdir_stub
@@ -69,9 +69,9 @@ describe("note", function()
         file_readable_stub.returns(0)
       end)
 
-      it("ensures the spreads directory exists", function()
+      it("ensures the directory exists", function()
         subject()
-        assert.stub(vim_mkdir_stub).was_called_with(vim.fn.expand("~/test_bujo/spreads"), "p")
+        assert.stub(vim_mkdir_stub).was_called_with(vim.fn.expand("~/test_bujo/spreads/2025"), "p")
       end)
 
       it("creates a new spread with the current date", function()
@@ -89,6 +89,13 @@ describe("note", function()
         config.options.spreads.template = "test_template"
         subject()
         assert.stub(templates_execute_stub).was_called_with("test_template", vim.fn.expand("~/test_bujo/spreads/2025/W26.md"))
+        assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/spreads/2025/W26.md"))
+      end)
+
+      it("does not execute the template if not configured", function()
+        config.options.spreads.template = false
+        subject()
+        assert.stub(templates_execute_stub).was_not_called()
         assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/spreads/2025/W26.md"))
       end)
     end)
@@ -252,7 +259,7 @@ describe("note", function()
       vim_ui_input_stub:revert()
     end)
 
-    it("ensures the notes directory exists", function()
+    it("ensures the directory exists", function()
       subject()
       assert.stub(vim_mkdir_stub).was_called_with(vim.fn.expand("~/test_bujo/notes"), "p")
     end)

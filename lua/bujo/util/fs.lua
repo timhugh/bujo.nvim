@@ -30,4 +30,15 @@ function M.get_current_bujo_file(bufnr)
   end
 end
 
+function M.get_path_relative_to(base_dir, file_path)
+  local absolute_base_dir = vim.fn.expand(base_dir)
+  local absolute_file_path = vim.fn.expand(file_path)
+
+  local relative_file_path = absolute_file_path:sub(#absolute_base_dir +1)
+  if relative_file_path:sub(1, 1) == "/" then
+    relative_file_path = relative_file_path:sub(2) -- remove leading slash if present
+  end
+  return relative_file_path
+end
+
 return M
