@@ -7,26 +7,29 @@ local date = require("bujo.util.date")
 
 local parse_date_from_template = function(date_string, template)
   local parsed_date = date.parse(date_string, template)
-  if not parsed_date then
-    return nil
-  end
+  if not parsed_date then return end
+
   return os.time(parsed_date)
+end
+
+local function execute_template_if_new_file(template_path, file_path)
+  if not template_path or template_path == false then return end
+  if vim.fn.filereadable(file_path) == 1 then return end
+
+  local file = io.open(file_path, "w")
+  if not file then
+    vim.notify("Bujo: Failed to write document: " .. file_path, vim.log.levels.ERROR)
+    return
+  end
+
+  templates.execute(template_path, file_path)
 end
 
 local function open_or_create_document(file_path, template_path)
   file_path = vim.fn.expand(file_path)
 
-  if vim.fn.filereadable(file_path) == 0 then
-    local file = io.open(file_path, "w")
-    if file then
-      if template_path and template_path ~= false then
-        templates.execute(template_path, file_path)
-      end
-    else
-      vim.notify("Failed to create document: " .. file_path, vim.log.levels.ERROR)
-      return
-    end
-  end
+  execute_template_if_new_file(template_path, file_path)
+
   vim.schedule(function()
     vim.cmd("edit " .. vim.fn.fnameescape(file_path))
   end)
@@ -46,35 +49,32 @@ function M.note()
 end
 
 function M.now()
-  local spreads_dir = vim.fn.join({ config.options.base_directory, config.options.spreads.subdirectory }, "/")
+  local opts = config.options.spreads
+  local spreads_dir = vim.fn.join({ config.options.base_directory, opts.subdirectory }, "/")
   fs.ensure_directory(spreads_dir)
 
-  local current_file = os.date(config.options.spreads.filename_template)
+  local current_file = os.date(opts.filename_template)
   local current_file_path = vim.fn.join({ spreads_dir, current_file }, "/") .. ".md"
 
   local current_file_dir = vim.fn.fnamemodify(current_file_path, ":h")
   fs.ensure_directory(current_file_dir)
 
-  open_or_create_document(current_file_path, config.options.spreads.template)
-end
-
-local function is_spread(file_path)
-  local spreads_dir = vim.fn.join({ config.options.base_directory, config.options.spreads.subdirectory }, "/")
-  return file_path:match("%.md$") and fs.file_is_in_directory(file_path, spreads_dir)
+  open_or_create_document(current_file_path, opts.template)
 end
 
 local function get_current_spread_name()
   local spreads_dir = vim.fn.expand(vim.fn.join({ config.options.base_directory, config.options.spreads.subdirectory }, "/"))
 
   local currently_open_file = vim.api.nvim_buf_get_name(0)
-  if not is_spread(currently_open_file) then return nil end
 
   return fs.get_path_relative_to(spreads_dir, currently_open_file):gsub("%.md$", "")
 end
 
 local function get_date_from_current_spread(template)
   local current_spread = get_current_spread_name()
-  return parse_date_from_template(current_spread, config.options.spreads.filename_template)
+  if not current_spread then return end
+
+  return parse_date_from_template(current_spread, template)
 end
 
 local function iterate_date_to_next_template(start_time, step_seconds, max_steps, template)
@@ -83,10 +83,8 @@ local function iterate_date_to_next_template(start_time, step_seconds, max_steps
   local next_file = start_file
   local current_time = start_time
   while next_file == start_file do
-    if retries >= max_steps then
-      vim.notify("Failed to find next spread after " .. max_steps .. " attempts", vim.log.levels.WARN)
-      return
-    end
+    if retries >= max_steps then return end
+
     current_time = current_time + step_seconds
     next_file = os.date(template, current_time)
     retries = retries + 1
@@ -107,6 +105,14 @@ function M.next()
     opts.iteration_max_steps,
     opts.filename_template)
 
+  if not next_file then
+    vim.notify("Bujo: Failed to find next spread after " .. opts.iteration_max_steps .. " attempts\n" ..
+    "If this seems like a mistake, check out the iteration settings in your bujo config\n" ..
+    "(Details can be found in the README)",
+    vim.log.levels.WARN)
+    return
+  end
+
   local next_file_path = vim.fn.join({ spreads_dir, next_file }, "/") .. ".md"
   open_or_create_document(next_file_path, opts.template)
 end
@@ -123,6 +129,14 @@ function M.previous()
     -opts.iteration_step_seconds,
     opts.iteration_max_steps,
     opts.filename_template)
+
+  if not prev_file then
+    vim.notify("Bujo: Failed to find previous spread after " .. opts.iteration_max_steps .. " attempts\n" ..
+    "If this seems like a mistake, check out the iteration settings in your bujo config\n" ..
+    "(Details can be found in the README)",
+    vim.log.levels.WARN)
+    return
+  end
 
   local prev_file_path = vim.fn.join({ spreads_dir, prev_file }, "/") .. ".md"
   open_or_create_document(prev_file_path, config.options.spreads.template)
