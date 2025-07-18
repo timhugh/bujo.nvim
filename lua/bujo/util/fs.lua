@@ -3,7 +3,6 @@ local M = {}
 local config = require("bujo.config")
 
 function M.ensure_directory(dir)
-  dir = vim.fn.expand(dir)
   if vim.fn.mkdir(dir, "p") == 0 then
     vim.notify("Failed to create directory: " .. dir, vim.log.levels.ERROR)
   end

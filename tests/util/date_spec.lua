@@ -21,14 +21,14 @@ describe("date parsing", function()
     local format = "%Y-W%V"
     local parsed_date, err = date.parse(date_str, format)
     assert.is_nil(err)
-    assert.are.same({
+    assert.are.same(parsed_date, {
       year = 2025,
       month = 9,
       day = 29,
       hour = 0,
       min = 0,
       sec = 0
-    }, parsed_date)
+    })
   end)
 
   it("parses weekly timestamps that start and end in different months", function()
@@ -37,14 +37,14 @@ describe("date parsing", function()
     local format = "%Y-W%V"
     local parsed_date, err = date.parse(date_str, format)
     assert.is_nil(err)
-    assert.are.same({
+    assert.are.same(parsed_date, {
       year = 2025,
       month = 6,
       day = 30,
       hour = 0,
       min = 0,
       sec = 0
-    }, parsed_date)
+    })
   end)
 
   it("parses correct month on edge dates", function()
@@ -52,13 +52,13 @@ describe("date parsing", function()
     local format = "%Y-%m"
     local parsed_date, err = date.parse(date_str, format)
     assert.is_nil(err)
-    assert.are.same({
+    assert.are.same(parsed_date, {
       year = 2025,
       month = 8,
       day = 1,
       hour = 0,
       min = 0,
       sec = 0
-    }, parsed_date)
+    })
   end)
 end)

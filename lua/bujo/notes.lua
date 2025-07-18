@@ -35,26 +35,39 @@ local function open_or_create_document(file_path, template_path)
   end)
 end
 
+local function load_spread_config(name)
+  if not name then return nil, "Spread name is required" end
+  local opts = config.options.spreads[name]
+  if not opts then
+    return nil, "Spread '" .. name .. "' is not configured"
+  end
+  return opts, nil
+end
+
 function M.note()
-  local notes_dir = vim.fn.join({ config.options.base_directory, config.options.notes.subdirectory }, "/")
-  fs.ensure_directory(notes_dir)
+  local opts = config.options.notes
+  fs.ensure_directory(opts.subdirectory)
 
   vim.ui.input({ prompt = "New note name: " }, function(input)
     if input and input ~= "" then
       local filename = input:gsub("[^%w-]", "_") .. ".md"
-      local file_path = vim.fn.expand(vim.fn.join({ notes_dir, filename }, "/"))
+      local file_path = vim.fn.join({ opts.subdirectory, filename }, "/")
       vim.cmd("edit " .. vim.fn.fnameescape(file_path))
     end
   end)
 end
 
-function M.now()
-  local opts = config.options.spreads
-  local spreads_dir = vim.fn.join({ config.options.base_directory, opts.subdirectory }, "/")
-  fs.ensure_directory(spreads_dir)
+function M.now(config_name)
+  local opts, err = load_spread_config(config_name)
+  if err then
+    vim.notify("Bujo: " .. err, vim.log.levels.ERROR)
+    return
+  end
+
+  local bujo_root = config.options.base_directory
 
   local current_file = os.date(opts.filename_template)
-  local current_file_path = vim.fn.join({ spreads_dir, current_file }, "/") .. ".md"
+  local current_file_path = vim.fn.join({ bujo_root, current_file }, "/") .. ".md"
 
   local current_file_dir = vim.fn.fnamemodify(current_file_path, ":h")
   fs.ensure_directory(current_file_dir)
@@ -63,11 +76,9 @@ function M.now()
 end
 
 local function get_current_spread_name()
-  local spreads_dir = vim.fn.expand(vim.fn.join({ config.options.base_directory, config.options.spreads.subdirectory }, "/"))
-
+  local bujo_root = config.options.base_directory
   local currently_open_file = vim.api.nvim_buf_get_name(0)
-
-  return fs.get_path_relative_to(spreads_dir, currently_open_file):gsub("%.md$", "")
+  return fs.get_path_relative_to(bujo_root, currently_open_file):gsub("%.md$", "")
 end
 
 local function get_date_from_current_spread(template)
@@ -92,11 +103,14 @@ local function iterate_date_to_next_template(start_time, step_seconds, max_steps
   return next_file
 end
 
-function M.next()
-  local opts = config.options.spreads
-  local spreads_dir = vim.fn.join({ config.options.base_directory, opts.subdirectory }, "/")
-  fs.ensure_directory(spreads_dir)
+function M.next(config_name)
+  local opts, err = load_spread_config(config_name)
+  if err then
+    vim.notify("Bujo: " .. err, vim.log.levels.ERROR)
+    return
+  end
 
+  local bujo_root = config.options.base_directory
   local start_time = get_date_from_current_spread(opts.filename_template) or os.time()
 
   local next_file = iterate_date_to_next_template(
@@ -113,14 +127,18 @@ function M.next()
     return
   end
 
-  local next_file_path = vim.fn.join({ spreads_dir, next_file }, "/") .. ".md"
+  local next_file_path = vim.fn.join({ bujo_root, next_file }, "/") .. ".md"
   open_or_create_document(next_file_path, opts.template)
 end
 
-function M.previous()
-  local opts = config.options.spreads
-  local spreads_dir = vim.fn.join({ config.options.base_directory, config.options.spreads.subdirectory }, "/")
-  fs.ensure_directory(spreads_dir)
+function M.previous(config_name)
+  local opts, err = load_spread_config(config_name)
+  if err then
+    vim.notify("Bujo: " .. err, vim.log.levels.ERROR)
+    return
+  end
+
+  local bujo_root = config.options.base_directory
 
   local start_time = get_date_from_current_spread(opts.filename_template) or os.time()
 
@@ -138,21 +156,32 @@ function M.previous()
     return
   end
 
-  local prev_file_path = vim.fn.join({ spreads_dir, prev_file }, "/") .. ".md"
+  local prev_file_path = vim.fn.join({ bujo_root, prev_file }, "/") .. ".md"
   open_or_create_document(prev_file_path, config.options.spreads.template)
 end
 
 function M.install()
   local keybind = require("bujo.util.keybind")
-  keybind.map_if_defined("n", config.options.spreads.now_keybind, M.now, {
-    desc = "Bujo: Create or open current spread",
-  })
-  keybind.map_if_defined("n", config.options.spreads.next_keybind, M.next, {
-    desc = "Bujo: Open next spread",
-  })
-  keybind.map_if_defined("n", config.options.spreads.previous_keybind, M.previous, {
-    desc = "Bujo: Open previous spread",
-  })
+  for spread_name, spread_config in pairs(config.options.spreads) do
+    if spread_config then
+      keybind.map_if_defined("n", spread_config.now_keybind, function()
+        M.now(spread_name)
+      end, {
+        desc = "Bujo: Create or open current " .. spread_name .. " spread",
+      })
+      keybind.map_if_defined("n", spread_config.next_keybind, function()
+        M.next(spread_name)
+      end, {
+        desc = "Bujo: Open next " .. spread_name .. " spread",
+      })
+      keybind.map_if_defined("n", spread_config.previous_keybind, function()
+        M.previous(spread_name)
+      end, {
+        desc = "Bujo: Open previous " .. spread_name .. " spread",
+      })
+    end
+  end
+
   keybind.map_if_defined("n", config.options.notes.note_keybind, M.note, {
     desc = "Bujo: Create a new note",
   })
