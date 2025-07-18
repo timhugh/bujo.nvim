@@ -164,6 +164,7 @@ BujoConfigSingleton.options = vim.deepcopy(defaults)
 local function apply_spread_defaults()
   for spread_name, spread_config in pairs(BujoConfigSingleton.options.spreads) do
     if spread_config then
+      BujoConfigSingleton.options.spreads[spread_name] = vim.tbl_deep_extend("keep", spread_config, defaults.spreads[spread_name] or {})
       BujoConfigSingleton.options.spreads[spread_name] = vim.tbl_deep_extend("keep", spread_config, default_iteration_params)
     else
       BujoConfigSingleton.options.spreads[spread_name] = nil

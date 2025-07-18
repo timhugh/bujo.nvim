@@ -32,6 +32,31 @@ describe("config", function()
       assert.is_nil(resolved_config.spreads.weekly)
     end)
 
+    it("allows overriding individual setting in the default weekly spread", function()
+      local resolved_config = config.setup({
+        spreads = {
+          weekly = {
+            template = "weekly_template",
+            now_keybind = "<leader>nw",
+          },
+        },
+      })
+
+      assert.is_not_nil(resolved_config.spreads.weekly)
+      assert.are.same(
+        {
+          filename_template = "%Y/W%V",
+          now_keybind = "<leader>nw",
+          next_keybind = "<leader>nf",
+          previous_keybind = "<leader>nb",
+          iteration_step_seconds = 86400,
+          iteration_max_steps = 120,
+          template = "weekly_template",
+        },
+        resolved_config.spreads.weekly
+      )
+    end)
+
     it("normalizes paths in the config", function()
       local resolved_config = config.setup({
         base_directory = "~/test_bujo",
