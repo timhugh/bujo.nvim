@@ -34,7 +34,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 - [nvim-telescope/telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) is required for pickers. Technically you can use the other features of bujo.nvim without it, but you're missing out on a big part of what makes it useful
 - [leafo/etlua](https://github.com/leafo/etlua) is required if you want to use templates
 - [michaelb/sniprun](https://github.com/michaelb/sniprun) is required if you want to be able to execute code blocks in your markdown files
-- LuaJIT is required to use the next/previous functions. It's very likely that you are already are using LuaJIT, but if you're not sure you can learn more about that in the [Neovim docs](https://neovim.io/doc/user/lua.html#lua-luajit)
+- LuaJIT is required to use the forward/back functions. It's very likely that you are already are using LuaJIT, but if you're not sure you can learn more about that in the [Neovim docs](https://neovim.io/doc/user/lua.html#lua-luajit)
 
 ## Usage
 
@@ -42,12 +42,12 @@ bujo.nvim distinguishes between two types of documents. A "spread" is tied to a 
 
 Here are some of the common functions:
 
-- Open the current week's spread with `<leader>nn` ('n' for now) or `:Bujo now`
-- Open last week's spread with `<leader>nb` ('b' for back) or `:Bujo previous`
-- Open next week's spread with `<leader>nf` ('f' for forward) or `:Bujo next`
-  - If the current buffer is a spread, you can use next/previous to continue navigating further forward/backward through time
-- Create a new note with `<leader>nN` or `:Bujo note`. You will be prompted for a name
-- Search for and open a specific document with `<leader>fn` or `:Bujo find`
+- Open the current week's spread with `<leader>nn` ('n' for now)
+- Open last week's spread with `<leader>nb` ('b' for back)
+- Open next week's spread with `<leader>nf` ('f' for forward)
+  - If the current buffer is a spread, you can use forward/back to continue navigating further forward/backward through time
+- Create a new note with `<leader>nN` ('N' for note), and enter a name when prompted
+- Search for and open a specific document with `<leader>fn` ('fn' for find note)
 
 bujo.nvim also provides some conveniences for linking documents together. Note these keybinds are only mapped in markdown documents:
 
@@ -55,13 +55,13 @@ bujo.nvim also provides some conveniences for linking documents together. Note t
 - Follow a document link with `gf`. If there's only a single link on the current line, your cursor doesn't even have to be inside it
 - Use `<C-Space>` to toggle the checkbox on the current line between unchecked `[ ]` and checked `[x]`
 
-Additionally, bujo.nvim integrates with [michaelb/sniprun](https://github.com/michaelb/sniprun), allowing you to use `<leader>nr` or `:Bujo execute_code_block` to send the entire code block under your cursor to sniprun for evaluation. bujo.nvim doesn't supply any special configuration to sniprun, so you'll want to refer to [sniprun's thorough documentation](https://michaelb.github.io/sniprun/) if you need to tweak anything for the languages you use.
+Additionally, bujo.nvim integrates with [michaelb/sniprun](https://github.com/michaelb/sniprun), allowing you to use `<leader>nr` ('r' for run) to send the entire code block under your cursor to sniprun for evaluation. bujo.nvim doesn't supply any special configuration to sniprun, so you'll want to refer to [sniprun's thorough documentation](https://michaelb.github.io/sniprun/) if you need to tweak anything for the languages you use.
 
 ### Templates
 
-`.etlua` files can be placed in the templates_dir (`<base_directory>/.templates` by default). For spreads, use the configuration `spreads.template` to specify the filename of a template, and that template will be applied any time a new spread is created (using `:Bujo now`, `:Bujo next`, etc).
+`.etlua` files can be placed in the templates_dir (`<base_directory>/.templates` by default). For spreads, use the configuration `spreads.template` to specify the filename of a template, and that template will be applied any time a new spread is created (using now, forward, backward, etc).
 
-`<leader>nt` or `:Bujo template` does the same thing as `:Bujo note` but allows you to specify a template to execute on the created document. For example `:Bujo template meeting_notes` will prompt for a new note name and create the file normally, but also execute `<template_dir>/meeting_notes.etlua` on the newly created file.
+`<leader>nt` ('t' for template) creates a note just like the new note command but it allows you to specify a template from your templates directory to execute on the created document.
 
 See the [etlua README](https://github.com/leafo/etlua/blob/master/README.md) for information about how to format templates. The evaluation context for templates includes access to the plugin configuration as `bujo_config`, as well as anything you normally have access to in Lua.
 
