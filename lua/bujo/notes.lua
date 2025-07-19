@@ -157,7 +157,7 @@ function M.previous(config_name)
   end
 
   local prev_file_path = vim.fn.join({ bujo_root, prev_file }, "/") .. ".md"
-  open_or_create_document(prev_file_path, config.options.spreads.template)
+  open_or_create_document(prev_file_path, opts.template)
 end
 
 function M.install()
