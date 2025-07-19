@@ -4,13 +4,14 @@ A markdown bullet journal accessible from any neovim session!
 
 Featuring:
 
-- uses standard markdown files so you're not locked in to a specific journal app/plugin
-- highly configurable and unopinionated to suit your flow
-- access and edit your notes from any neovim instance
-- convenient mappings for inserting links and navigating between linked documents
-- define templates for new notes using [leafo/etlua](https://github.com/leafo/etlua)
-- provides [telescope](https://github.com/nvim-telescope/telescope.nvim) extensions to easily find notes and insert links
-- executable codeblocks using [michaelb/sniprun](https://github.com/michaelb/sniprun)
+- Uses standard markdown files so you're not locked in to a specific journal app/plugin
+- Highly configurable and unopinionated to suit your flow
+- Access and edit your notes from any neovim instance
+- Convenient mappings for inserting links and navigating between linked documents
+- Define templates for new notes using [leafo/etlua](https://github.com/leafo/etlua)
+- Provides [telescope](https://github.com/nvim-telescope/telescope.nvim) extensions to easily find notes and insert links
+- Executable codeblocks using [michaelb/sniprun](https://github.com/michaelb/sniprun)
+- Support for multiple spreads with arbitrary date spans. Weekly and monthly? Go for it. Daily and quarterly? Why not. Hourly? You do you.
 
 ## Installation
 
@@ -59,7 +60,7 @@ Additionally, bujo.nvim integrates with [michaelb/sniprun](https://github.com/mi
 
 ### Templates
 
-`.etlua` files can be placed in the templates_dir (`<base_directory>/.templates` by default). For spreads, use the configuration `spreads.template` to specify the filename of a template, and that template will be applied any time a new spread is created (using now, forward, backward, etc).
+`.etlua` files can be placed in the templates_dir (`<base_directory>/.templates` by default). For spreads, use the `template` config field to specify the filename of a template, and that template will be applied any time a new spread is created (using now, forward, backward, etc).
 
 `<leader>nt` ('t' for template) creates a note just like the new note command but it allows you to specify a template from your templates directory to execute on the created document.
 
@@ -90,9 +91,6 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
   ......
   opts = {
     base_directory = "~/my_bujo",
-    spreads = {
-      filename_template = "%Y-%m-%d",
-    },
     markdown = {
       follow_external_link_keybind = false,
     },
@@ -105,13 +103,41 @@ Or manually:
 ```lua
 require("bujo").setup({
   base_directory = "~/my_bujo",
-  spreads = {
-    filename_template = "%Y-%m-%d",
-  },
   markdown = {
     follow_external_link_keybind = false,
   },
 })
+```
+
+### Custom spreads
+
+By default, bujo.nvim creates weekly spreads, but it supports anything you can dream up using date specifiers.
+
+- `"%Y/%m-%B"`: "2025/07-July.md"
+- `"%Y/%m/%d-%a"`: "2025/07/18-Fri.md"
+
+You can configure as many spans as you like with separate templates and bindings:
+
+```lua
+opts = {
+  spreads = {
+    weekly = false, -- disable the default weekly spreads
+    daily = {
+      filename_template = "journal/%Y/%m-%d",
+      template = "daily_spread",
+      now_keybind = "<leader>nt",
+      next_keybind = "<leader>nf",
+      previous_keybind = "<leader>nb",
+    },
+    monthly = {
+      filename_template = "journal/%Y/%m",
+      template = "monthly_spread",
+      now_keybind = "<leader>nm",
+      next_keybind = false,
+      previous_keybind = false,
+    },
+  },
+}
 ```
 
 ## Compatibility
@@ -126,7 +152,7 @@ bujo.nvim does not provide any markdown rendering or formatting capability. I've
 
 ## Contributing
 
-Feel free to submit Issues or PRs! I tried to make bujo.nvim configurable and modular, but I built it with my personal use case in mind and with very little Lua and plugin development experience, so I'm happy to take suggestions and improvements.
+Feel free to submit issues or PRs! I tried to make bujo.nvim configurable and modular, but I built it with my personal use case in mind and with very little Lua and plugin development experience, so I'm happy to take suggestions and improvements.
 
 Some notes on process/design ideals:
 - There isn't a versioning/release strategy yet. I'm avoiding breaking changes, but no guarantees for the time being
@@ -157,3 +183,10 @@ nvim --headless -c 'PlenaryBustedDirectory tests/' +qall
 # specific test:
 nvim --headless -c 'PlenaryBustedFile tests/notes_spec.lua' +qall
 ```
+
+For manual testing, some example minimal configs are provided in the `/examples` directory:
+
+```sh
+nvim -u examples/lazy-basic.lua
+```
+

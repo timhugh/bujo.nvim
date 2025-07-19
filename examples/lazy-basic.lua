@@ -37,6 +37,12 @@ require("lazy").setup({
     },
     opts = {
       base_directory = bujo_dir .. "/examples/journal",
+      spreads = {
+        monthly = {
+          filename_template = "%Y/%m-%B",
+          now_keybind = "<leader>nm",
+        },
+      },
     },
   },
 })
