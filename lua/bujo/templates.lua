@@ -3,7 +3,7 @@ local M = {}
 local config = require("bujo.config")
 M.load_error = true
 
-function M.execute(template_name, destination_file)
+function M.execute(template_name, destination_file, context)
   if M.load_error then
     return
   end
@@ -22,9 +22,9 @@ function M.execute(template_name, destination_file)
     return
   end
 
-  local rendered_content = template({
-    bujo_config = config.options,
-  })
+  context = context or {}
+  context.bujo_config = config.options
+  local rendered_content = template(context)
 
   local file = io.open(vim.fn.expand(destination_file), "w")
   if not file then

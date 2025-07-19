@@ -12,7 +12,7 @@ local parse_date_from_template = function(date_string, template)
   return os.time(parsed_date)
 end
 
-local function execute_template_if_new_file(template_path, file_path)
+local function execute_template_if_new_file(template_path, file_path, context)
   if not template_path or template_path == false then return end
   if vim.fn.filereadable(file_path) == 1 then return end
 
@@ -22,13 +22,16 @@ local function execute_template_if_new_file(template_path, file_path)
     return
   end
 
-  templates.execute(template_path, file_path)
+  templates.execute(template_path, file_path, context)
 end
 
-local function open_or_create_document(file_path, template_path)
+local function open_or_create_document(file_path, template_path, template_context)
   file_path = vim.fn.expand(file_path)
 
-  execute_template_if_new_file(template_path, file_path)
+  local file_dir = vim.fn.fnamemodify(file_path, ":h")
+  fs.ensure_directory(file_dir)
+
+  execute_template_if_new_file(template_path, file_path, template_context)
 
   vim.schedule(function()
     vim.cmd("edit " .. vim.fn.fnameescape(file_path))
@@ -66,13 +69,10 @@ function M.now(config_name)
 
   local bujo_root = config.options.base_directory
 
-  local current_file = os.date(opts.filename_template)
-  local current_file_path = vim.fn.join({ bujo_root, current_file }, "/") .. ".md"
+  local now_file = os.date(opts.filename_template)
+  local now_file_path = vim.fn.join({ bujo_root, now_file }, "/") .. ".md"
 
-  local current_file_dir = vim.fn.fnamemodify(current_file_path, ":h")
-  fs.ensure_directory(current_file_dir)
-
-  open_or_create_document(current_file_path, opts.template)
+  open_or_create_document(now_file_path, opts.template, { span_start_date = parse_date_from_template(now_file, opts.filename_template) })
 end
 
 local function get_current_spread_name()
@@ -128,7 +128,7 @@ function M.next(config_name)
   end
 
   local next_file_path = vim.fn.join({ bujo_root, next_file }, "/") .. ".md"
-  open_or_create_document(next_file_path, opts.template)
+  open_or_create_document(next_file_path, opts.template, { span_start_date = parse_date_from_template(next_file, opts.filename_template) })
 end
 
 function M.previous(config_name)
@@ -157,7 +157,7 @@ function M.previous(config_name)
   end
 
   local prev_file_path = vim.fn.join({ bujo_root, prev_file }, "/") .. ".md"
-  open_or_create_document(prev_file_path, opts.template)
+  open_or_create_document(prev_file_path, opts.template, { span_start_date = parse_date_from_template(prev_file, opts.filename_template) })
 end
 
 function M.install()

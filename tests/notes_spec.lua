@@ -33,7 +33,7 @@ describe("notes", function()
     time_util.stubbed_time = {
       year = 2025,
       month = 6,
-      day = 23,
+      day = 25,
     }
     os_date_stub = stub(os, "date", time_util.os_date_stub)
     os_time_stub = stub(os, "time", time_util.os_time_stub)
@@ -94,8 +94,9 @@ describe("notes", function()
       it("executes the template if configured", function()
         config.options.spreads.weekly.template = "test_template"
         subject("weekly")
-        assert.stub(templates_execute_stub).was_called_with("test_template", vim.fn.expand("~/test_bujo/2025/W26.md"))
         assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/2025/W26.md"))
+        local expected_template_date = { year = 2025, month = 6, day = 23, hour = 0, min = 0, sec = 0 }
+        assert.stub(templates_execute_stub).was_called_with("test_template", vim.fn.expand("~/test_bujo/2025/W26.md"), { span_start_date = os.time(expected_template_date) })
       end)
 
       it("does not execute the template if not configured", function()
@@ -128,18 +129,23 @@ describe("notes", function()
 
     before_each(function()
       nvim_buf_get_name_stub = stub(vim.api, "nvim_buf_get_name")
+      config.options.spreads.weekly.template = "weekly_template"
+      config.options.spreads.daily.template = "daily_template"
+      config.options.spreads.monthly.template = "monthly_template"
     end)
 
     after_each(function()
       nvim_buf_get_name_stub:revert()
     end)
 
-    describe("weekly template", function()
+    describe("weekly spread", function()
       it("navigates forward one week from the current file", function()
         nvim_buf_get_name_stub.returns(vim.fn.expand("~/test_bujo/2025/W23.md"))
         notes.next("weekly")
         vim.wait(0)
         assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/2025/W24.md"))
+        local expected_template_date = { year = 2025, month = 6, day = 9, hour = 0, min = 0, sec = 0 }
+        assert.stub(templates_execute_stub).was_called_with("weekly_template", vim.fn.expand("~/test_bujo/2025/W24.md"), { span_start_date = os.time(expected_template_date) })
       end)
 
       it("navigates backward one week from the current file", function()
@@ -147,6 +153,8 @@ describe("notes", function()
         notes.previous("weekly")
         vim.wait(0)
         assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/2025/W22.md"))
+        local expected_template_date = { year = 2025, month = 5, day = 26, hour = 0, min = 0, sec = 0 }
+        assert.stub(templates_execute_stub).was_called_with("weekly_template", vim.fn.expand("~/test_bujo/2025/W22.md"), { span_start_date = os.time(expected_template_date) })
       end)
 
       it("navigates forward one week from the current date", function()
@@ -154,6 +162,8 @@ describe("notes", function()
         notes.next("weekly")
         vim.wait(0)
         assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/2025/W27.md"))
+        local expected_template_date = { year = 2025, month = 6, day = 30, hour = 0, min = 0, sec = 0 }
+        assert.stub(templates_execute_stub).was_called_with("weekly_template", vim.fn.expand("~/test_bujo/2025/W27.md"), { span_start_date = os.time(expected_template_date) })
       end)
 
       it("navigates backward one week from the current date", function()
@@ -161,15 +171,19 @@ describe("notes", function()
         notes.previous("weekly")
         vim.wait(0)
         assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/2025/W25.md"))
+        local expected_template_date = { year = 2025, month = 6, day = 16, hour = 0, min = 0, sec = 0 }
+        assert.stub(templates_execute_stub).was_called_with("weekly_template", vim.fn.expand("~/test_bujo/2025/W25.md"), { span_start_date = os.time(expected_template_date) })
       end)
     end)
 
-    describe("daily template", function()
+    describe("daily spread", function()
       it("navigates forward one day from the current file", function()
         nvim_buf_get_name_stub.returns(vim.fn.expand("~/test_bujo/daily/2025-06-22.md"))
         notes.next("daily")
         vim.wait(0)
         assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/daily/2025-06-23.md"))
+        local expected_template_date = { year = 2025, month = 6, day = 23, hour = 0, min = 0, sec = 0 }
+        assert.stub(templates_execute_stub).was_called_with("daily_template", vim.fn.expand("~/test_bujo/daily/2025-06-23.md"), { span_start_date = os.time(expected_template_date) })
       end)
 
       it("navigates backward one day from the current file", function()
@@ -177,29 +191,37 @@ describe("notes", function()
         notes.previous("daily")
         vim.wait(0)
         assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/daily/2025-06-21.md"))
+        local expected_template_date = { year = 2025, month = 6, day = 21, hour = 0, min = 0, sec = 0 }
+        assert.stub(templates_execute_stub).was_called_with("daily_template", vim.fn.expand("~/test_bujo/daily/2025-06-21.md"), { span_start_date = os.time(expected_template_date) })
       end)
 
       it("navigates forward one day from the current date", function()
         nvim_buf_get_name_stub.returns("some_other_file.md")
         notes.next("daily")
         vim.wait(0)
-        assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/daily/2025-06-24.md"))
+        assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/daily/2025-06-26.md"))
+        local expected_template_date = { year = 2025, month = 6, day = 26, hour = 0, min = 0, sec = 0 }
+        assert.stub(templates_execute_stub).was_called_with("daily_template", vim.fn.expand("~/test_bujo/daily/2025-06-26.md"), { span_start_date = os.time(expected_template_date) })
       end)
 
       it("navigates backward one day from the current date", function()
         nvim_buf_get_name_stub.returns("some_other_file.md")
         notes.previous("daily")
         vim.wait(0)
-        assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/daily/2025-06-22.md"))
+        assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/daily/2025-06-24.md"))
+        local expected_template_date = { year = 2025, month = 6, day = 24, hour = 0, min = 0, sec = 0 }
+        assert.stub(templates_execute_stub).was_called_with("daily_template", vim.fn.expand("~/test_bujo/daily/2025-06-24.md"), { span_start_date = os.time(expected_template_date) })
       end)
     end)
 
-    describe("monthly template", function()
+    describe("monthly spread", function()
       it("navigates forward one month from the current file", function()
         nvim_buf_get_name_stub.returns(vim.fn.expand("~/test_bujo/2025-08-August.md"))
         notes.next("monthly")
         vim.wait(0)
         assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/2025-09-September.md"))
+        local expected_template_date = { year = 2025, month = 9, day = 1, hour = 0, min = 0, sec = 0 }
+        assert.stub(templates_execute_stub).was_called_with("monthly_template", vim.fn.expand("~/test_bujo/2025-09-September.md"), { span_start_date = os.time(expected_template_date) })
       end)
 
       it("navigates backward one month from the current file", function()
@@ -207,6 +229,8 @@ describe("notes", function()
         notes.previous("monthly")
         vim.wait(0)
         assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/2025-07-July.md"))
+        local expected_template_date = { year = 2025, month = 7, day = 1, hour = 0, min = 0, sec = 0 }
+        assert.stub(templates_execute_stub).was_called_with("monthly_template", vim.fn.expand("~/test_bujo/2025-07-July.md"), { span_start_date = os.time(expected_template_date) })
       end)
 
       it("navigates forward one month from the current date", function()
@@ -214,6 +238,8 @@ describe("notes", function()
         notes.next("monthly")
         vim.wait(0)
         assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/2025-07-July.md"))
+        local expected_template_date = { year = 2025, month = 7, day = 1, hour = 0, min = 0, sec = 0 }
+        assert.stub(templates_execute_stub).was_called_with("monthly_template", vim.fn.expand("~/test_bujo/2025-07-July.md"), { span_start_date = os.time(expected_template_date) })
       end)
 
       it("navigates backward one month from the current date", function()
@@ -221,6 +247,8 @@ describe("notes", function()
         notes.previous("monthly")
         vim.wait(0)
         assert.stub(vim_cmd_stub).was_called_with("edit " .. vim.fn.expand("~/test_bujo/2025-05-May.md"))
+        local expected_template_date = { year = 2025, month = 5, day = 1, hour = 0, min = 0, sec = 0 }
+        assert.stub(templates_execute_stub).was_called_with("monthly_template", vim.fn.expand("~/test_bujo/2025-05-May.md"), { span_start_date = os.time(expected_template_date) })
       end)
     end)
   end)

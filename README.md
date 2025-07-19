@@ -64,7 +64,7 @@ Additionally, bujo.nvim integrates with [michaelb/sniprun](https://github.com/mi
 
 `<leader>nt` ('t' for template) creates a note just like the new note command but it allows you to specify a template from your templates directory to execute on the created document.
 
-See the [etlua README](https://github.com/leafo/etlua/blob/master/README.md) for information about how to format templates. The evaluation context for templates includes access to the plugin configuration as `bujo_config`, as well as anything you normally have access to in Lua.
+See the [etlua README](https://github.com/leafo/etlua/blob/master/README.md) for information about how to format templates. The evaluation context for templates includes access to the plugin configuration as `bujo_config`, access to the first date of the current span as `span_start_date` (this only applies to spreads), and any global you normally have access to in Lua.
 
 ### Git integration
 
