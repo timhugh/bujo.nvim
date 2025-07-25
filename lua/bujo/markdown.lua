@@ -36,20 +36,20 @@ local function get_link_path()
   local line = vim.api.nvim_get_current_line()
   local links = get_markdown_links(line)
 
-    local link_path = nil
+  local link_path = nil
 
-    if #links == 1 then
-      link_path = links[1].path
-    elseif #links > 1 then
-      local _, col = unpack(vim.api.nvim_win_get_cursor(0))
-      local cursor_pos = col + 1
-      for _, link in ipairs(links) do
-        if cursor_pos >= link.start and cursor_pos <= link.finish then
-          link_path = link.path
-          break
-        end
+  if #links == 1 then
+    link_path = links[1].path
+  elseif #links > 1 then
+    local _, col = unpack(vim.api.nvim_win_get_cursor(0))
+    local cursor_pos = col + 1
+    for _, link in ipairs(links) do
+      if cursor_pos >= link.start and cursor_pos <= link.finish then
+        link_path = link.path
+        break
       end
     end
+  end
 
   return link_path
 end
@@ -64,11 +64,11 @@ function M.follow_bujo_link()
       vim.cmd("edit " .. vim.fn.fnameescape(full_path))
     end)
     return ""
-  else
-    -- fall through to the next handler for the keybind
-    --   this allows overriding standard keybinds like `gf` or `<CR>` without affecting their normal behavior
-    return config.options.markdown.follow_bujo_link_keybind
   end
+
+  -- fall through to the next handler for the keybind
+  --   this allows overriding standard keybinds like `gf` or `<CR>` without affecting their normal behavior
+  return config.options.markdown.follow_bujo_link_keybind
 end
 
 function M.follow_external_link()
@@ -79,11 +79,11 @@ function M.follow_external_link()
       vim.ui.open(link_path)
     end)
     return ""
-  else
-    -- fall through to the next handler for the keybind
-    --   this allows overriding standard keybinds like `gx` without affecting their normal behavior
-    return config.options.markdown.follow_external_link_keybind
   end
+
+  -- fall through to the next handler for the keybind
+  --   this allows overriding standard keybinds like `gx` without affecting their normal behavior
+  return config.options.markdown.follow_external_link_keybind
 end
 
 function M.execute_code_block()
@@ -111,22 +111,26 @@ end
 
 local function map_keybinds()
   local keybind = require("bujo.util.keybind")
-  keybind.map_if_defined("n",
+  keybind.map_if_defined(
+    "n",
     config.options.markdown.toggle_check_keybind,
     M.toggle_check,
     { desc = "Bujo: Toggle checkbox state" }
   )
-  keybind.map_if_defined("n",
+  keybind.map_if_defined(
+    "n",
     config.options.markdown.follow_bujo_link_keybind,
     M.follow_bujo_link,
     { expr = true, desc = "Bujo: Follow bujo link" }
   )
-  keybind.map_if_defined("n",
+  keybind.map_if_defined(
+    "n",
     config.options.markdown.follow_external_link_keybind,
     M.follow_external_link,
     { expr = true, desc = "Bujo: Follow external link in default system handler" }
   )
-  keybind.map_if_defined("n",
+  keybind.map_if_defined(
+    "n",
     config.options.markdown.execute_code_block_keybind,
     M.execute_code_block,
     { desc = "Bujo: Execute code block" }
