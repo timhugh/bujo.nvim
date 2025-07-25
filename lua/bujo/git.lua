@@ -14,14 +14,13 @@ local function run_command_in_base_dir(command)
   local process = vim.system(command, { cwd = bujo_root })
   local result = process:wait()
   if result.code ~= 0 then
-    vim.notify("Bujo: command failed: " .. table.concat(process.cmd, " ") .. " - " .. result.stderr, vim.log.levels.ERROR)
-    return false
+    return false, result.stderr
   end
-  return result.stdout
+  return true, result.stdout
 end
 
-local function notify(message, level)
-  if not config.options.git.notify then
+local function notify(message, level, force)
+  if not force and not config.options.git.notify then
     return
   end
 
@@ -29,52 +28,85 @@ local function notify(message, level)
   vim.notify("Bujo: " .. message, level)
 end
 
-local function commit_and_push(delay)
+local function auto_commit_and_push(delay)
+  if not config.options.git.auto_commit then
+    return
+  end
+
   delay = delay or tonumber(config.options.git.debounce_ms) or 1000
   M._save_timer:stop()
   M._save_timer:start(delay, 0, vim.schedule_wrap(function()
-    local should_commit = config.options.git.auto_commit
-    local should_push = config.options.git.auto_push
-
-    if not should_commit then
-      return
-    end
-
-    local dirty = run_command_in_base_dir({ "git", "status", "--porcelain" })
-    if not dirty or dirty == "" then
-      return
-    end
-
-    notify("Committing changes", vim.log.levels.INFO)
-    if not run_command_in_base_dir({ "git", "add", "." }) then return end
-    if not run_command_in_base_dir({ "git", "commit", "-m", get_commit_message() }) then return end
-
-    if should_push then
-      notify("Pushing changes to remote", vim.log.levels.INFO)
-      if not run_command_in_base_dir({"git", "push"}) then return end
-    end
+    if not M.commit() then return end
+    if not config.options.git.auto_push then return end
+    if not M.pull() then return end
+    M.push()
   end))
 end
 
-function M.commit_and_push_if_bujo_file()
+local function is_dirty()
+  local ok, output = run_command_in_base_dir({ "git", "status", "--porcelain" })
+  return ok and output and output ~= ""
+end
+
+local function commit_and_push_if_bujo_file()
   local current_file = fs.get_current_bujo_file(vim.api.nvim_get_current_buf())
   if current_file then
-    commit_and_push()
+    auto_commit_and_push(config.options.git.debounce_ms)
   end
 end
 
+function M.commit()
+  if not is_dirty() then return end
+
+  notify("Committing changes", vim.log.levels.INFO)
+  local ok, output = run_command_in_base_dir({ "git", "add", "." })
+  if not ok then
+    notify("Failed to stage changes: " .. output, vim.log.levels.ERROR, true)
+    return false
+  end
+  ok, output = run_command_in_base_dir({ "git", "commit", "-m", get_commit_message() })
+  if not ok then
+    notify("Failed to commit changes: " .. output, vim.log.levels.ERROR, true)
+    return false
+  end
+
+  return true
+end
+
+function M.push()
+  notify("Pushing changes to remote", vim.log.levels.INFO)
+  local ok, output = run_command_in_base_dir({ "git", "push" })
+  if not ok then
+    notify("Failed to push changes: " .. output, vim.log.levels.ERROR, true)
+    return false
+  end
+  return true
+end
+
+function M.pull()
+  notify("Pulling changes from remote", vim.log.levels.INFO)
+  local ok, output = run_command_in_base_dir({ "git", "pull", "--rebase" })
+  if not ok then
+    notify("Failed to pull changes: " .. output, vim.log.levels.ERROR, true)
+    return false
+  end
+  return true
+end
+
 function M.install()
-  vim.api.nvim_create_autocmd("BufWritePost", {
-    pattern = "*.md",
-    callback = function()
-      M.commit_and_push_if_bujo_file()
-    end,
-  })
-  vim.api.nvim_create_autocmd("VimLeavePre", {
-    callback = function()
-      commit_and_push(0)
-    end,
-  })
+  if config.options.git.auto_commit then
+    vim.api.nvim_create_autocmd("BufWritePost", {
+      pattern = "*.md",
+      callback = function()
+        commit_and_push_if_bujo_file()
+      end,
+    })
+    vim.api.nvim_create_autocmd("VimLeavePre", {
+      callback = function()
+        auto_commit_and_push(0)
+      end,
+    })
+  end
 end
 
 return M
