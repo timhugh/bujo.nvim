@@ -79,6 +79,42 @@ git = {
 },
 ```
 
+### API
+
+All functionality can be accessed via the Lua API, allowing you to manually map your own keybinds or user commands.
+
+Spread-related functions take the name of the spread config as a parameter:
+
+```lua
+-- open this week's spread
+require('bujo.note').now('weekly')
+-- open next month's spread
+require('bujo.note').next('monthly')
+-- open yesterday's daily spread
+require('bujo.note').previous('daily')
+```
+
+Most other functions require no parameters:
+
+```lua
+-- create a new note (will prompt for name)
+require('bujo.note').note()
+-- open a bujo document picker
+require('bujo.find').find()
+-- commit, push, and pull git changes in your bujo directory
+require('bujo.git').commit()
+require('bujo.git').push()
+require('bujo.git').pull()
+-- toggle markdown checkboxes
+require('bujo.markdown').toggle_check()
+-- follow links to other bujo documents
+require('bujo.markdown').follow_bujo_link()
+-- follow external links, like URLs
+require('bujo.markdown').follow_external_link()
+-- execute codeblocks using sniprun
+require('bujo.markdown').execute_code_block()
+```
+
 ## Configuration
 
 No configuration is necessary for bujo.nvim to work out of the box. By default, it will create weekly spreads in the `~/.bujo` directory. Please refer to the documentation in [config.lua](/lua/bujo/config.lua) for more information about each config and how it can be used. If you would like to disable any of the default keybinds, simply set their value to `false`.
