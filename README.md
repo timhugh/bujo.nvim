@@ -1,5 +1,7 @@
 # bujo.nvim
 
+**Deprecated in favor of a CLI approach: https://github.com/timhugh/bujo**
+
 A markdown bullet journal accessible from any neovim session!
 
 Featuring:
